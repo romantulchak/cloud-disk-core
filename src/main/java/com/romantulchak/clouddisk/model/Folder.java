@@ -41,79 +41,89 @@ public class Folder {
         return id;
     }
 
-    public void setId(long id) {
+    public Folder setId(long id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Folder setName(String name) {
         this.name = name;
+        return this;
     }
 
     public List<Folder> getSubFolders() {
         return subFolders;
     }
 
-    public void setSubFolders(List<Folder> subFolders) {
+    public Folder setSubFolders(List<Folder> subFolders) {
         this.subFolders = subFolders;
+        return this;
     }
 
     public Drive getDrive() {
         return drive;
     }
 
-    public void setDrive(Drive drive) {
+    public Folder setDrive(Drive drive) {
         this.drive = drive;
+        return this;
     }
 
     public boolean isHasLinkAccess() {
         return hasLinkAccess;
     }
 
-    public void setHasLinkAccess(boolean hasLinkAccess) {
+    public Folder setHasLinkAccess(boolean hasLinkAccess) {
         this.hasLinkAccess = hasLinkAccess;
+        return this;
     }
 
     public UUID getLink() {
         return link;
     }
 
-    public void setLink(UUID link) {
+    public Folder setLink(UUID link) {
         this.link = link;
+        return this;
     }
 
     public LocalDateTime getCreateAt() {
         return createAt;
     }
 
-    public void setCreateAt(LocalDateTime createAt) {
+    public Folder setCreateAt(LocalDateTime createAt) {
         this.createAt = createAt;
+        return this;
     }
 
     public User getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public Folder setOwner(User owner) {
         this.owner = owner;
+        return this;
     }
 
     public List<File> getFiles() {
         return files;
     }
 
-    public void setFiles(List<File> files) {
+    public Folder setFiles(List<File> files) {
         this.files = files;
+        return this;
     }
 
     public LocalDateTime getUploadAt() {
         return uploadAt;
     }
 
-    public void setUploadAt(LocalDateTime uploadAt) {
+    public Folder setUploadAt(LocalDateTime uploadAt) {
         this.uploadAt = uploadAt;
+        return this;
     }
 }

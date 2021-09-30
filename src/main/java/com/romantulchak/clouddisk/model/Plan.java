@@ -20,6 +20,11 @@ public class Plan {
     @OneToMany(mappedBy = "plan")
     private List<Drive> drives;
 
+    public Plan(){}
+
+    public Plan(@Size(max = 90) PlanType name) {
+        this.name = name;
+    }
 
     public long getId() {
         return id;

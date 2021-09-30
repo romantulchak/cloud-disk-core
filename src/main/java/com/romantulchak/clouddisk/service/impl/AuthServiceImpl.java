@@ -13,6 +13,7 @@ import com.romantulchak.clouddisk.repository.RoleRepository;
 import com.romantulchak.clouddisk.repository.UserRepository;
 import com.romantulchak.clouddisk.security.jwt.JwtUtils;
 import com.romantulchak.clouddisk.service.AuthService;
+import com.romantulchak.clouddisk.service.DriveService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,17 +36,20 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
+    private final DriveService driveService;
 
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            RoleRepository roleRepository,
                            PasswordEncoder encoder,
-                           JwtUtils jwtUtils) {
+                           JwtUtils jwtUtils,
+                           DriveService driveService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
+        this.driveService = driveService;
         this.jwtUtils = jwtUtils;
     }
 
@@ -86,5 +90,6 @@ public class AuthServiceImpl implements AuthService {
         roles.add(role);
         user.setRoles(roles);
         userRepository.save(user);
+        driveService.create(user);
     }
 }

@@ -19,7 +19,7 @@ public class Drive {
     @OneToMany(mappedBy = "drive", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Folder> folders;
 
-    private LocalDateTime creatAt;
+    private LocalDateTime createAt;
 
     @OneToOne
     private User owner;
@@ -34,55 +34,62 @@ public class Drive {
         return id;
     }
 
-    public void setId(long id) {
+    public Drive setId(long id) {
         this.id = id;
+        return this;
     }
 
     public List<Folder> getFolders() {
         return folders;
     }
 
-    public void setFolders(List<Folder> folders) {
+    public Drive setFolders(List<Folder> folders) {
         this.folders = folders;
+        return this;
     }
 
     public User getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public Drive setOwner(User owner) {
         this.owner = owner;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Drive setName(String name) {
         this.name = name;
+        return this;
     }
 
-    public LocalDateTime getCreatAt() {
-        return creatAt;
+    public LocalDateTime getCreateAt() {
+        return createAt;
     }
 
-    public void setCreatAt(LocalDateTime creatAt) {
-        this.creatAt = creatAt;
+    public Drive setCreateAt(LocalDateTime createAt) {
+        this.createAt = createAt;
+        return this;
     }
 
     public Plan getPlan() {
         return plan;
     }
 
-    public void setPlan(Plan plan) {
+    public Drive setPlan(Plan plan) {
         this.plan = plan;
+        return this;
     }
 
     public List<File> getFiles() {
         return files;
     }
 
-    public void setFiles(List<File> files) {
+    public Drive setFiles(List<File> files) {
         this.files = files;
+        return this;
     }
 }
