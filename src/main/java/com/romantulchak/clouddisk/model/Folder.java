@@ -6,6 +6,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@NamedEntityGraph(
+        name = "Folder.subFolders",
+        attributeNodes = @NamedAttributeNode("subFolders")
+)
 @Entity
 public class Folder {
 
@@ -18,6 +22,7 @@ public class Folder {
     private String name;
 
     @OneToMany(orphanRemoval = true)
+    @JoinTable(name = "folder_subFolders")
     private List<Folder> subFolders;
 
     @ManyToOne

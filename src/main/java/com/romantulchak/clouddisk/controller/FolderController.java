@@ -5,9 +5,11 @@ import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.service.FolderService;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(value = "*", maxAge = 3600L)
@@ -22,8 +24,9 @@ public class FolderController {
 
     @PostMapping("/create/{driveName}")
     @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(authentication, #driveName)")
-    public void createFolder(@RequestBody String folderName, @PathVariable("driveName") String driveName){
-        folderService.create(folderName, driveName);
+    @JsonView(View.FolderView.class)
+    public FolderDTO createFolder(@RequestBody String folderName, @PathVariable("driveName") String driveName, Authentication authentication){
+        return folderService.create(folderName, driveName, authentication);
     }
 
     @GetMapping("/{driveName}")
@@ -32,5 +35,26 @@ public class FolderController {
     public List<FolderDTO> findAllFoldersForDrive(@PathVariable("driveName") String driveName){
         return folderService.findAllFoldersForDrive(driveName);
     }
+    @PostMapping("/create-subfolder/{mainFolderLink}")
+    @PreAuthorize("hasRole('USER')")
+    @JsonView(View.FolderView.class)
+    public FolderDTO createSubFolder(@RequestBody String folderName,
+                                     @PathVariable("mainFolderLink") UUID folderLink,
+                                     Authentication authentication){
+        return folderService.createSubFolder(folderName, folderLink, authentication);
+    }
+
+    @GetMapping("/sub-folders/{folderLink}")
+    @JsonView(View.FolderView.class)
+    public List<FolderDTO> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
+        return folderService.findSubFoldersInFolder(folderLink);
+    }
+
+    @DeleteMapping("/remove/{folderLink}")
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
+    public void removeFolder(@PathVariable("folderLink") UUID folderLink){
+        folderService.removeFolder(folderLink);
+    }
+
 
 }

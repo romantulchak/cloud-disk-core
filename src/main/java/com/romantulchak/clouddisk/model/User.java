@@ -40,6 +40,12 @@ public class User {
 
     public User(){}
 
+    public User(long id, String firstName, String lastName){
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public User(@Size(max = 50) String firstName, @Size(max = 75) String lastName, @Size(max = 90) String username, @Size(max = 90) @Email String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;

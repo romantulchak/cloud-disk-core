@@ -12,6 +12,8 @@ import java.util.UUID;
 @DTO
 public class FolderDTO {
 
+    @JsonView(View.FolderView.class)
+    @MapToDTO(mapClass = {View.FolderView.class})
     private long id;
 
     @JsonView(View.FolderView.class)
@@ -20,8 +22,6 @@ public class FolderDTO {
 
     private List<FolderDTO> subFolders;
 
-    @JsonView(View.FolderView.class)
-    @MapToDTO(mapClass = {View.FolderView.class})
     private DriveDTO drive;
 
     @JsonView(View.FolderView.class)
