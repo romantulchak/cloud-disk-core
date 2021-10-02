@@ -1,6 +1,8 @@
 package com.romantulchak.clouddisk.model;
 
 public class View {
-    public interface DriveView{}
-    public interface FolderView{}
+    public interface DriveView{ }
+    public interface FolderView{ }
+    public interface FileView { }
+    public interface FolderFileView { }
 }

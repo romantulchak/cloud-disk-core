@@ -3,44 +3,50 @@ package com.romantulchak.clouddisk.dto;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mapperDTO.annotation.DTO;
 import com.mapperDTO.annotation.MapToDTO;
+import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
+import com.romantulchak.clouddisk.model.enums.ContextType;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @DTO
-public class FolderDTO {
+public class FolderDTO implements Store {
 
-    @JsonView(View.FolderView.class)
-    @MapToDTO(mapClass = {View.FolderView.class})
+    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
     private long id;
 
-    @JsonView(View.FolderView.class)
-    @MapToDTO(mapClass = {View.FolderView.class})
+    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
     private String name;
 
     private List<FolderDTO> subFolders;
 
     private DriveDTO drive;
 
-    @JsonView(View.FolderView.class)
-    @MapToDTO(mapClass = {View.FolderView.class})
+    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
     private UUID link;
 
-    @JsonView(View.FolderView.class)
-    @MapToDTO(mapClass = {View.FolderView.class})
+    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
     private LocalDateTime createAt;
 
     private LocalDateTime uploadAt;
 
-    @JsonView(View.FolderView.class)
-    @MapToDTO(mapClass = {View.FolderView.class})
+    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
     private UserDTO owner;
 
     private boolean hasLinkAccess;
 
     private List<FileDTO> files;
+
+    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
+    private ContextType context = ContextType.FOLDER;
 
     public long getId() {
         return id;
@@ -120,5 +126,13 @@ public class FolderDTO {
 
     public void setFiles(List<FileDTO> files) {
         this.files = files;
+    }
+
+    public ContextType getContext() {
+        return context;
+    }
+
+    public void setContext(ContextType context) {
+        this.context = context;
     }
 }

@@ -11,7 +11,7 @@ import java.util.UUID;
         attributeNodes = @NamedAttributeNode("subFolders")
 )
 @Entity
-public class Folder {
+public class Folder implements Store{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +33,10 @@ public class Folder {
     private LocalDateTime createAt;
 
     private LocalDateTime uploadAt;
+
+    private String fullPath;
+
+    private String shortPath;
 
     @ManyToOne
     private User owner;
@@ -129,6 +133,24 @@ public class Folder {
 
     public Folder setUploadAt(LocalDateTime uploadAt) {
         this.uploadAt = uploadAt;
+        return this;
+    }
+
+    public String getFullPath() {
+        return fullPath;
+    }
+
+    public Folder setFullPath(String fullPath) {
+        this.fullPath = fullPath;
+        return this;
+    }
+
+    public String getShortPath() {
+        return shortPath;
+    }
+
+    public Folder setShortPath(String shortPath) {
+        this.shortPath = shortPath;
         return this;
     }
 }

@@ -30,6 +30,10 @@ public class Drive {
     @OneToMany(mappedBy = "drive", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<File> files;
 
+    private String fullPath;
+
+    private String shortPath;
+
     public long getId() {
         return id;
     }
@@ -90,6 +94,24 @@ public class Drive {
 
     public Drive setFiles(List<File> files) {
         this.files = files;
+        return this;
+    }
+
+    public String getFullPath() {
+        return fullPath;
+    }
+
+    public Drive setFullPath(String fullPath) {
+        this.fullPath = fullPath;
+        return this;
+    }
+
+    public String getShortPath() {
+        return shortPath;
+    }
+
+    public Drive setShortPath(String shortPath) {
+        this.shortPath = shortPath;
         return this;
     }
 }

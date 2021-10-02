@@ -2,6 +2,7 @@ package com.romantulchak.clouddisk.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.romantulchak.clouddisk.dto.FolderDTO;
+import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.service.FolderService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,8 +32,8 @@ public class FolderController {
 
     @GetMapping("/{driveName}")
     @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(authentication, #driveName)")
-    @JsonView(View.FolderView.class)
-    public List<FolderDTO> findAllFoldersForDrive(@PathVariable("driveName") String driveName){
+    @JsonView(View.FolderFileView.class)
+    public List<Store> findAllFoldersForDrive(@PathVariable("driveName") String driveName){
         return folderService.findAllFoldersForDrive(driveName);
     }
     @PostMapping("/create-subfolder/{mainFolderLink}")
@@ -45,8 +46,8 @@ public class FolderController {
     }
 
     @GetMapping("/sub-folders/{folderLink}")
-    @JsonView(View.FolderView.class)
-    public List<FolderDTO> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
+    @JsonView(View.FolderFileView.class)
+    public List<Store> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
         return folderService.findSubFoldersInFolder(folderLink);
     }
 

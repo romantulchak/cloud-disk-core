@@ -4,15 +4,14 @@ import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.DriveDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.PlanWithTypeNotFoundException;
-import com.romantulchak.clouddisk.model.Drive;
-import com.romantulchak.clouddisk.model.Plan;
-import com.romantulchak.clouddisk.model.User;
-import com.romantulchak.clouddisk.model.View;
+import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.PlanType;
 import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.PlanRepository;
 import com.romantulchak.clouddisk.service.DriveService;
+import com.romantulchak.clouddisk.utils.FolderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +24,12 @@ public class DriveServiceImpl implements DriveService {
     private final DriveRepository driveRepository;
     private final PlanRepository planRepository;
     private final EntityMapperInvoker<Drive, DriveDTO> entityMapperInvoker;
+
+    @Value("${cloud.disk.files.folder}")
+    private String drivePath;
+
+    @Value("${cloud.disk.host}")
+    private String host;
 
     @Autowired
     public DriveServiceImpl(DriveRepository driveRepository,
@@ -44,6 +49,10 @@ public class DriveServiceImpl implements DriveService {
                 .setOwner(user)
                 .setPlan(plan)
                 .setCreateAt(LocalDateTime.now());
+        FolderUtils folderUtils = new FolderUtils(drivePath, host);
+        LocalPath localPath = folderUtils.createDrive(driveName);
+        drive.setFullPath(localPath.getFullPath())
+                .setShortPath((localPath.getShortPath()));
         driveRepository.save(drive);
     }
 
@@ -55,7 +64,7 @@ public class DriveServiceImpl implements DriveService {
         return convertToDTO(drive, View.DriveView.class);
     }
 
-    private DriveDTO convertToDTO(Drive drive, Class<?> classToCheck){
+    private DriveDTO convertToDTO(Drive drive, Class<?> classToCheck) {
         return entityMapperInvoker.entityToDTO(drive, DriveDTO.class, classToCheck);
     }
 }
