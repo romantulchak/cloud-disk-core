@@ -23,20 +23,17 @@ public class DriveServiceImpl implements DriveService {
 
     private final DriveRepository driveRepository;
     private final PlanRepository planRepository;
+    private final FolderUtils folderUtils;
     private final EntityMapperInvoker<Drive, DriveDTO> entityMapperInvoker;
-
-    @Value("${cloud.disk.files.folder}")
-    private String drivePath;
-
-    @Value("${cloud.disk.host}")
-    private String host;
 
     @Autowired
     public DriveServiceImpl(DriveRepository driveRepository,
                             PlanRepository planRepository,
+                            FolderUtils folderUtils,
                             EntityMapperInvoker<Drive, DriveDTO> entityMapperInvoker) {
         this.driveRepository = driveRepository;
         this.planRepository = planRepository;
+        this.folderUtils = folderUtils;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
@@ -49,7 +46,6 @@ public class DriveServiceImpl implements DriveService {
                 .setOwner(user)
                 .setPlan(plan)
                 .setCreateAt(LocalDateTime.now());
-        FolderUtils folderUtils = new FolderUtils(drivePath, host);
         LocalPath localPath = folderUtils.createDrive(driveName);
         drive.setFullPath(localPath.getFullPath())
                 .setShortPath((localPath.getShortPath()));

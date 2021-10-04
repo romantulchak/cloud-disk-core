@@ -19,7 +19,10 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     @EntityGraph(value = "Folder.subFolders")
     Optional<Folder> findFolderByLink(UUID link);
 
-    @Query(value = "SELECT DISTINCT id, create_at, has_link_access, link, name, upload_at, drive_id, owner_id FROM folder f LEFT JOIN folder_sub_folders fsf on f.id = fsf.folder_id WHERE f.id IN (SELECT fsf1.sub_folders_id FROM folder_sub_folders fsf1 LEFT JOIN folder f2 on fsf1.folder_id = f2.id WHERE f2.link = :link)", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT id, create_at, has_link_access, link, name, upload_at, drive_id, owner_id, full_path, short_path" +
+            " FROM folder f LEFT JOIN folder_sub_folders fsf on f.id = fsf.folder_id " +
+            "WHERE f.id IN (SELECT fsf1.sub_folders_id FROM folder_sub_folders fsf1 " +
+            "LEFT JOIN folder f2 on fsf1.folder_id = f2.id WHERE f2.link = :link)", nativeQuery = true)
     List<Folder> findSubFolders(@Param("link") UUID folderLink);
 
     boolean existsByLinkAndOwnerId(UUID folderLink, long userId);

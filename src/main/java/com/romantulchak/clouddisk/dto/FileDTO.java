@@ -29,7 +29,7 @@ public class FileDTO implements Store {
 
     @JsonView(View.FolderFileView.class)
     @MapToDTO(mapClass = {View.FolderFileView.class})
-    private int size;
+    private long size;
 
     private FolderDTO folder;
 
@@ -45,6 +45,8 @@ public class FileDTO implements Store {
     @MapToDTO(mapClass = {View.FolderFileView.class})
     private UserDTO owner;
 
+    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class})
     private String extension;
 
     @JsonView(View.FolderFileView.class)
@@ -83,11 +85,11 @@ public class FileDTO implements Store {
         this.uploadAt = uploadAt;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(long size) {
         this.size = size;
     }
 

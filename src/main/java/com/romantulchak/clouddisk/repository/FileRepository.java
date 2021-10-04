@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface FileRepository extends JpaRepository<File, Long> {
 
-    List<File> findFirstByFolderLink(UUID link);
+    List<File> findAllByFolderLink(UUID link);
 
     List<File> findFirstByDriveName(String driveName);
 

@@ -3,6 +3,7 @@ package com.romantulchak.clouddisk.service.impl;
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
+import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.repository.DriveRepository;
@@ -11,12 +12,10 @@ import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,50 +28,53 @@ public class FolderServiceImpl implements FolderService {
     private final FolderRepository folderRepository;
     private final DriveRepository driveRepository;
     private final FileService fileService;
+    private final FolderUtils folderUtils;
     private final EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker;
 
-    @Value("${cloud.disk.files.folder}")
-    private String drivePath;
-
-    @Value("${cloud.disk.host}")
-    private String host;
 
     @Autowired
     public FolderServiceImpl(FolderRepository folderRepository,
                              DriveRepository driveRepository,
                              FileService fileService,
+                             FolderUtils folderUtils,
                              EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker) {
         this.folderRepository = folderRepository;
         this.driveRepository = driveRepository;
         this.fileService = fileService;
+        this.folderUtils = folderUtils;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
     @Override
     public FolderDTO create(String folderName, String driveName, Authentication authentication) {
-        Folder folder = getFolder(folderName, driveName, authentication);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        User user = new User(userDetails.getId(), userDetails.getFirstName(), userDetails.getLastName());
+        Drive drive = driveRepository.findDriveByName(driveName)
+                .orElseThrow(() -> new DriveNotFoundException(user.getUsername()));
+        Folder folder = getFolder(folderName, user, drive.getShortPath())
+                .setDrive(drive);
+        folder = folderRepository.save(folder);
         return convertToDTO(folder, View.FolderView.class);
     }
 
-    private Folder getFolder(String folderName, String driveName, Authentication authentication) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        User user = new User(userDetails.getId(), userDetails.getFirstName(), userDetails.getLastName());
-        Drive drive = driveRepository.findDriveByName(driveName).orElse(null);
+    private Folder getFolder(String folderName, User user, String shortPath) {
         Folder folder = new Folder()
                 .setName(folderName)
                 .setOwner(user)
-                .setDrive(drive)
                 .setLink(UUID.randomUUID())
                 .setCreateAt(LocalDateTime.now())
                 .setUploadAt(LocalDateTime.now());
-        FolderUtils folderUtils = new FolderUtils(drivePath, host);
-        LocalPath path;
-        if (drive != null){
-            path = folderUtils.createFolder(folderName, drive);
-        }
-
-        folder = folderRepository.save(folder);
+        LocalPath path = folderUtils.createFolder(folderName, shortPath);
+        folder.setFullPath(path.getFullPath())
+                .setShortPath(path.getShortPath());
         return folder;
+    }
+
+    private Folder getSubFolder(String folderName, Authentication authentication, String shortPath) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        User user = new User(userDetails.getId(), userDetails.getFirstName(), userDetails.getLastName());
+        return getFolder(folderName, user, shortPath);
+
     }
 
     @Override
@@ -91,8 +93,9 @@ public class FolderServiceImpl implements FolderService {
     @Override
     public FolderDTO createSubFolder(String folderName, UUID folderLink, Authentication authentication) {
         Folder mainFolder = folderRepository.findFolderByLink(folderLink)
-                .orElseThrow(() -> new FolderNotFoundException(folderLink.toString()));
-        Folder subFolder = getFolder(folderName, null, authentication);
+                .orElseThrow(() -> new FolderNotFoundException(folderLink));
+        Folder subFolder = getSubFolder(folderName, authentication, mainFolder.getShortPath());
+        folderRepository.save(subFolder);
         mainFolder.getSubFolders().add(subFolder);
         return convertToDTO(subFolder, View.FolderView.class);
     }
