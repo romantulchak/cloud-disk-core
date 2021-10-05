@@ -16,7 +16,7 @@ public class UserDriverAccess {
         this.driveRepository = driveRepository;
     }
 
-    public boolean checkAccess(Authentication authentication, String name) {
+    public boolean checkAccess(String name, Authentication authentication) {
         UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
         if (user == null) {
             return false;

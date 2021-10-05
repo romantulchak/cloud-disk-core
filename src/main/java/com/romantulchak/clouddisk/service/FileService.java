@@ -14,7 +14,9 @@ public interface FileService {
 
     List<FileDTO> findFilesInDrive(String driveName);
 
-    CompletableFuture<List<FileDTO>> uploadFiles(List<MultipartFile> files, UUID folderLink, Authentication authentication);
+    CompletableFuture<FileDTO> uploadFileIntoFolder(MultipartFile file, UUID folderLink, Authentication authentication);
 
-    CompletableFuture<FileDTO> uploadFiles(MultipartFile file, UUID folderLink, Authentication authentication);
+    CompletableFuture<FileDTO> uploadFileIntoDrive(MultipartFile file, String driveName, Authentication authentication);
+
+    void deleteFileInFolder(UUID fileLink);
 }

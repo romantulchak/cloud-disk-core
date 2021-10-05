@@ -12,6 +12,7 @@ import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,9 +113,14 @@ public class FolderServiceImpl implements FolderService {
         return stores;
     }
 
+    @Async
     @Override
     public void removeFolder(UUID folderLink) {
-        folderRepository.deleteFolderByLink(folderLink);
+        Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
+        boolean isDeleted = folderUtils.removeElement(folder.getShortPath());
+        if(isDeleted) {
+            folderRepository.deleteFolderByLink(folderLink);
+        }
     }
 
     private FolderDTO convertToDTO(Folder folder, Class<?> classToCheck) {

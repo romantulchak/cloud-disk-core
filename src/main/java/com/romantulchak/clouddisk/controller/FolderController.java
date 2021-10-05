@@ -24,20 +24,20 @@ public class FolderController {
     }
 
     @PostMapping("/create/{driveName}")
-    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(authentication, #driveName)")
+    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
     @JsonView(View.FolderView.class)
     public FolderDTO createFolder(@RequestBody String folderName, @PathVariable("driveName") String driveName, Authentication authentication){
         return folderService.create(folderName, driveName, authentication);
     }
 
     @GetMapping("/{driveName}")
-    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(authentication, #driveName)")
+    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
     @JsonView(View.FolderFileView.class)
     public List<Store> findAllFoldersForDrive(@PathVariable("driveName") String driveName){
         return folderService.findAllFoldersForDrive(driveName);
     }
     @PostMapping("/create-subfolder/{mainFolderLink}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
     @JsonView(View.FolderView.class)
     public FolderDTO createSubFolder(@RequestBody String folderName,
                                      @PathVariable("mainFolderLink") UUID folderLink,
@@ -46,6 +46,7 @@ public class FolderController {
     }
 
     @GetMapping("/sub-folders/{folderLink}")
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
     @JsonView(View.FolderFileView.class)
     public List<Store> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
         return folderService.findSubFoldersInFolder(folderLink);

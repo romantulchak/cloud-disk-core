@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 
 //TODO: fix files
@@ -64,7 +67,19 @@ public class FolderUtils {
             e.printStackTrace();
             throw new RuntimeException("See logs");
         }
+    }
 
+    public boolean removeElement(String folderPath){
+        Path path = Paths.get(folderPath);
+        try(Stream<Path> walk = Files.walk(path)) {
+            walk.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("See logs");
+        }
     }
 
     private String getFileRelativePath(String path){

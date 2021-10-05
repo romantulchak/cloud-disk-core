@@ -2,11 +2,11 @@ package com.romantulchak.clouddisk.controller;
 
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.service.FileService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -22,17 +22,24 @@ public class FileController {
     }
 
     @PostMapping("/upload-into-folder/{folderLink}")
-    public List<FileDTO> uploadIntoFolder(@RequestPart(value = "file") List<MultipartFile> files,
-                                          @PathVariable("folderLink") UUID folderLink,
-                                          Authentication authentication) throws ExecutionException, InterruptedException {
-        return fileService.uploadFiles(files,folderLink, authentication).get();
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
+    public FileDTO uploadIntoFolder(@RequestPart(value = "file") MultipartFile file,
+                                    @PathVariable("folderLink") UUID folderLink,
+                                    Authentication authentication) throws ExecutionException, InterruptedException {
+        return fileService.uploadFileIntoFolder(file, folderLink, authentication).get();
     }
 
+    @PostMapping("/upload-into-drive/{driveName}")
+    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
+    public FileDTO uploadIntoDrive(@RequestPart(value = "file") MultipartFile file,
+                                   @PathVariable("driveName") String driveName,
+                                   Authentication authentication) throws ExecutionException, InterruptedException {
+        return fileService.uploadFileIntoDrive(file, driveName, authentication).get();
+    }
 
-    @PostMapping("/upload-into-folder/{folderLink}")
-    public FileDTO uploadIntoFolder(@RequestPart(value = "file") MultipartFile file,
-                                          @PathVariable("folderLink") UUID folderLink,
-                                          Authentication authentication) throws ExecutionException, InterruptedException {
-        return fileService.uploadFiles(file,folderLink, authentication).get();
+    @DeleteMapping("/delete-file/{file}")
+    @PreAuthorize("hasRole('USER') AND @userFileAccess.hasAccess(#fileLink, authentication)")
+    public void deleteFileInFolder(@PathVariable("file") UUID fileLink) {
+        fileService.deleteFileInFolder(fileLink);
     }
 }
