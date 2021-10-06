@@ -2,11 +2,14 @@ package com.romantulchak.clouddisk.controller;
 
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.service.FileService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -41,5 +44,11 @@ public class FileController {
     @PreAuthorize("hasRole('USER') AND @userFileAccess.hasAccess(#fileLink, authentication)")
     public void deleteFileInFolder(@PathVariable("file") UUID fileLink) {
         fileService.deleteFileInFolder(fileLink);
+    }
+
+    @GetMapping(value = "/download-file/{fileLink}")
+    @ResponseBody
+    public ResponseEntity<Resource> downloadFile(@PathVariable("fileLink") UUID link) throws IOException {
+        return fileService.downloadFile(link);
     }
 }

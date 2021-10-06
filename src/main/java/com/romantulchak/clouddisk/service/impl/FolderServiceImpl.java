@@ -10,17 +10,24 @@ import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.FolderRepository;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
+import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
+import com.romantulchak.clouddisk.utils.ZipUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -118,9 +125,17 @@ public class FolderServiceImpl implements FolderService {
     public void removeFolder(UUID folderLink) {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
         boolean isDeleted = folderUtils.removeElement(folder.getShortPath());
-        if(isDeleted) {
+        if (isDeleted) {
             folderRepository.deleteFolderByLink(folderLink);
         }
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException {
+        Folder folder = folderRepository.findFolderByLink(folderLink)
+                .orElseThrow(() -> new FolderNotFoundException(folderLink));
+        Path path = ZipUtils.createZip(folder.getName(), folder.getShortPath());
+        return FileUtils.getResource(path, folder.getShortPath());
     }
 
     private FolderDTO convertToDTO(Folder folder, Class<?> classToCheck) {

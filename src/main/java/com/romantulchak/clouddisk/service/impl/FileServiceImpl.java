@@ -13,11 +13,16 @@ import com.romantulchak.clouddisk.repository.FolderRepository;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -113,6 +118,13 @@ public class FileServiceImpl implements FileService {
         if (isDeleted) {
             fileRepository.delete(file);
         }
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadFile(UUID link) throws IOException {
+        File file = fileRepository.findFileByLink(link).orElseThrow(() -> new FileNotFoundException(link));
+        Path path = Paths.get(file.getShortPath());
+        return FileUtils.getResource(path, file.getShortPath());
     }
 
     private void isFileNameExists(String fileName){

@@ -5,10 +5,13 @@ import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.service.FolderService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,5 +61,9 @@ public class FolderController {
         folderService.removeFolder(folderLink);
     }
 
-
+    @GetMapping("/download-folder/{folderLink}")
+    @ResponseBody
+    public ResponseEntity<Resource> downloadFolder(@PathVariable("folderLink") UUID folderLink) throws IOException {
+        return folderService.downloadFolder(folderLink);
+    }
 }
