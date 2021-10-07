@@ -66,4 +66,11 @@ public class FolderController {
     public ResponseEntity<Resource> downloadFolder(@PathVariable("folderLink") UUID folderLink) throws IOException {
         return folderService.downloadFolder(folderLink);
     }
+
+    @GetMapping("/removed-elements/{driveName}")
+    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
+    @JsonView(View.FolderFileView.class)
+    public List<Store> getRemovedElements(@PathVariable("driveName") String driveName){
+        return folderService.findRemovedElements(driveName);
+    }
 }

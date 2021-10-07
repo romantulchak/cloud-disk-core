@@ -1,6 +1,7 @@
 package com.romantulchak.clouddisk.repository;
 
 import com.romantulchak.clouddisk.model.Folder;
+import com.romantulchak.clouddisk.model.enums.RemoveType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,20 +15,22 @@ import java.util.UUID;
 
 public interface FolderRepository extends JpaRepository<Folder, Long> {
 
-    List<Folder> findAllByDriveName(@Param("driveName") String driveName);
+    List<Folder> findAllByDriveNameAndRemoveType(String driveName, RemoveType removeType);
 
     @EntityGraph(value = "Folder.subFolders")
     Optional<Folder> findFolderByLink(UUID link);
 
-    @Query(value = "SELECT DISTINCT id, create_at, has_link_access, link, name, upload_at, drive_id, owner_id, full_path, short_path" +
+    @Query(value = "SELECT DISTINCT id, create_at, has_link_access, link, name, upload_at, drive_id, owner_id, full_path, short_path, remove_type, trash_id" +
             " FROM folder f LEFT JOIN folder_sub_folders fsf on f.id = fsf.folder_id " +
             "WHERE f.id IN (SELECT fsf1.sub_folders_id FROM folder_sub_folders fsf1 " +
-            "LEFT JOIN folder f2 on fsf1.folder_id = f2.id WHERE f2.link = :link)", nativeQuery = true)
-    List<Folder> findSubFolders(@Param("link") UUID folderLink);
+            "LEFT JOIN folder f2 on fsf1.folder_id = f2.id WHERE f2.link = :link) AND f.remove_type = :removeType", nativeQuery = true)
+    List<Folder> findSubFolders(@Param("link") UUID folderLink, @Param("removeType") String removeType);
 
     boolean existsByLinkAndOwnerId(UUID folderLink, long userId);
 
     @Transactional
     @Modifying
     void deleteFolderByLink(UUID folderLink);
+
+    List<Folder> findAllByTrashId(long id);
 }

@@ -9,11 +9,12 @@ import com.romantulchak.clouddisk.model.enums.PlanType;
 import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.PlanRepository;
 import com.romantulchak.clouddisk.service.DriveService;
+import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,19 +25,23 @@ public class DriveServiceImpl implements DriveService {
     private final DriveRepository driveRepository;
     private final PlanRepository planRepository;
     private final FolderUtils folderUtils;
+    private final TrashService trashService;
     private final EntityMapperInvoker<Drive, DriveDTO> entityMapperInvoker;
 
     @Autowired
     public DriveServiceImpl(DriveRepository driveRepository,
                             PlanRepository planRepository,
                             FolderUtils folderUtils,
+                            TrashService trashService,
                             EntityMapperInvoker<Drive, DriveDTO> entityMapperInvoker) {
         this.driveRepository = driveRepository;
         this.planRepository = planRepository;
         this.folderUtils = folderUtils;
+        this.trashService = trashService;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
+    @Transactional
     @Override
     public void create(User user) {
         String driveName = user.getUsername() + "-" + UUID.randomUUID().toString().replace("-", "");
@@ -50,6 +55,8 @@ public class DriveServiceImpl implements DriveService {
         drive.setFullPath(localPath.getFullPath())
                 .setShortPath((localPath.getShortPath()));
         driveRepository.save(drive);
+        trashService.create(drive);
+
     }
 
     @Override

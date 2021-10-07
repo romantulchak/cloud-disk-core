@@ -1,5 +1,7 @@
 package com.romantulchak.clouddisk.model;
 
+import com.romantulchak.clouddisk.model.enums.RemoveType;
+
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -11,7 +13,7 @@ import java.util.UUID;
         attributeNodes = @NamedAttributeNode("subFolders")
 )
 @Entity
-public class Folder implements Store{
+public class Folder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,10 +36,6 @@ public class Folder implements Store{
 
     private LocalDateTime uploadAt;
 
-    private String fullPath;
-
-    private String shortPath;
-
     @ManyToOne
     private User owner;
 
@@ -45,6 +43,15 @@ public class Folder implements Store{
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "folder", orphanRemoval = true)
     private List<File> files;
+
+    @ManyToOne
+    private Trash trash;
+
+    @Embedded
+    private LocalPath path;
+
+    @Enumerated(EnumType.STRING)
+    private RemoveType removeType = RemoveType.SAVED;
 
     public long getId() {
         return id;
@@ -136,21 +143,30 @@ public class Folder implements Store{
         return this;
     }
 
-    public String getFullPath() {
-        return fullPath;
+    public Trash getTrash() {
+        return trash;
     }
 
-    public Folder setFullPath(String fullPath) {
-        this.fullPath = fullPath;
+    public Folder setTrash(Trash trash) {
+        this.trash = trash;
         return this;
     }
 
-    public String getShortPath() {
-        return shortPath;
+    public LocalPath getPath() {
+        return path;
     }
 
-    public Folder setShortPath(String shortPath) {
-        this.shortPath = shortPath;
+    public Folder setPath(LocalPath path) {
+        this.path = path;
+        return this;
+    }
+
+    public RemoveType getRemoveType() {
+        return removeType;
+    }
+
+    public Folder setRemoveType(RemoveType removeType) {
+        this.removeType = removeType;
         return this;
     }
 }

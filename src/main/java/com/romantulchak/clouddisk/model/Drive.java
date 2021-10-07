@@ -34,6 +34,9 @@ public class Drive {
 
     private String shortPath;
 
+    @OneToOne(mappedBy = "drive")
+    private Trash trash;
+
     public long getId() {
         return id;
     }
@@ -112,6 +115,15 @@ public class Drive {
 
     public Drive setShortPath(String shortPath) {
         this.shortPath = shortPath;
+        return this;
+    }
+
+    public Trash getTrash() {
+        return trash;
+    }
+
+    public Drive setTrash(Trash trash) {
+        this.trash = trash;
         return this;
     }
 }

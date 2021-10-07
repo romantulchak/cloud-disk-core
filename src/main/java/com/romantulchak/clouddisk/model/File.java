@@ -1,12 +1,14 @@
 package com.romantulchak.clouddisk.model;
 
+import com.romantulchak.clouddisk.model.enums.RemoveType;
+
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-public class File implements Store{
+public class File {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,14 +34,19 @@ public class File implements Store{
 
     private boolean hasLinkAccess;
 
-    private String fullPath;
-
-    private String shortPath;
-
     @ManyToOne
     private User owner;
 
     private String extension;
+
+    @ManyToOne
+    private Trash trash;
+
+    @Embedded
+    private LocalPath path;
+
+    @Enumerated(EnumType.STRING)
+    private RemoveType removeType = RemoveType.SAVED;
 
     public long getId() {
         return id;
@@ -140,21 +147,30 @@ public class File implements Store{
         return this;
     }
 
-    public String getFullPath() {
-        return fullPath;
+    public Trash getTrash() {
+        return trash;
     }
 
-    public File setFullPath(String path) {
-        this.fullPath = path;
+    public File setTrash(Trash trash) {
+        this.trash = trash;
         return this;
     }
 
-    public String getShortPath() {
-        return shortPath;
+    public LocalPath getPath() {
+        return path;
     }
 
-    public File setShortPath(String shortPath) {
-        this.shortPath = shortPath;
+    public File setPath(LocalPath path) {
+        this.path = path;
+        return this;
+    }
+
+    public RemoveType getRemoveType() {
+        return removeType;
+    }
+
+    public File setRemoveType(RemoveType removeType) {
+        this.removeType = removeType;
         return this;
     }
 }

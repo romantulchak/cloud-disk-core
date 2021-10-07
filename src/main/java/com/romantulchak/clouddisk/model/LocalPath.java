@@ -1,5 +1,8 @@
 package com.romantulchak.clouddisk.model;
 
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class LocalPath {
 
     private String fullPath;
@@ -8,6 +11,10 @@ public class LocalPath {
     public LocalPath(String fullPath, String shortPath) {
         this.fullPath = fullPath;
         this.shortPath = shortPath;
+    }
+
+    public LocalPath() {
+
     }
 
     public String getFullPath() {

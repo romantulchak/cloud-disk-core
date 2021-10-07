@@ -5,9 +5,12 @@ import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
+import com.romantulchak.clouddisk.exception.TrashNotFoundException;
 import com.romantulchak.clouddisk.model.*;
+import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.FolderRepository;
+import com.romantulchak.clouddisk.repository.TrashRepository;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
 import com.romantulchak.clouddisk.utils.FileUtils;
@@ -27,7 +30,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +39,7 @@ public class FolderServiceImpl implements FolderService {
     private final DriveRepository driveRepository;
     private final FileService fileService;
     private final FolderUtils folderUtils;
+    private final TrashRepository trashRepository;
     private final EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker;
 
 
@@ -45,11 +48,13 @@ public class FolderServiceImpl implements FolderService {
                              DriveRepository driveRepository,
                              FileService fileService,
                              FolderUtils folderUtils,
+                             TrashRepository trashRepository,
                              EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker) {
         this.folderRepository = folderRepository;
         this.driveRepository = driveRepository;
         this.fileService = fileService;
         this.folderUtils = folderUtils;
+        this.trashRepository = trashRepository;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
@@ -65,6 +70,12 @@ public class FolderServiceImpl implements FolderService {
         return convertToDTO(folder, View.FolderView.class);
     }
 
+    @Override
+    public Folder findFolderByLink(UUID folderLink) {
+        return folderRepository.findFolderByLink(folderLink)
+                .orElseThrow((() -> new FolderNotFoundException(folderLink)));
+    }
+
     private Folder getFolder(String folderName, User user, String shortPath) {
         Folder folder = new Folder()
                 .setName(folderName)
@@ -73,8 +84,7 @@ public class FolderServiceImpl implements FolderService {
                 .setCreateAt(LocalDateTime.now())
                 .setUploadAt(LocalDateTime.now());
         LocalPath path = folderUtils.createFolder(folderName, shortPath);
-        folder.setFullPath(path.getFullPath())
-                .setShortPath(path.getShortPath());
+        folder.setPath(path);
         return folder;
     }
 
@@ -87,7 +97,8 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public List<Store> findAllFoldersForDrive(String driveName) {
-        List<FolderDTO> folders = folderRepository.findAllByDriveName(driveName).stream()
+        List<FolderDTO> folders = folderRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED)
+                .stream()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
         List<FileDTO> files = fileService.findFilesInDrive(driveName);
@@ -102,7 +113,7 @@ public class FolderServiceImpl implements FolderService {
     public FolderDTO createSubFolder(String folderName, UUID folderLink, Authentication authentication) {
         Folder mainFolder = folderRepository.findFolderByLink(folderLink)
                 .orElseThrow(() -> new FolderNotFoundException(folderLink));
-        Folder subFolder = getSubFolder(folderName, authentication, mainFolder.getShortPath());
+        Folder subFolder = getSubFolder(folderName, authentication, mainFolder.getPath().getShortPath());
         folderRepository.save(subFolder);
         mainFolder.getSubFolders().add(subFolder);
         return convertToDTO(subFolder, View.FolderView.class);
@@ -110,7 +121,8 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public List<Store> findSubFoldersInFolder(UUID folderLink) {
-        List<FolderDTO> subFolders = folderRepository.findSubFolders(folderLink).stream()
+        List<FolderDTO> subFolders = folderRepository.findSubFolders(folderLink, RemoveType.SAVED.name())
+                .stream()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
         List<FileDTO> filesInFolder = fileService.findFilesInFolder(folderLink);
@@ -120,11 +132,30 @@ public class FolderServiceImpl implements FolderService {
         return stores;
     }
 
+    @Override
+    public List<Store> findRemovedElements(String driveName) {
+        Trash trash = trashRepository.findTrashByDriveName(driveName)
+                .orElseThrow(() -> new TrashNotFoundException(driveName));
+        List<FolderDTO> folders = findRemovedFoldersByTrashId(trash.getId());
+        List<FileDTO> files = fileService.findRemovedFilesByTrashId(trash.getId());
+        List<Store> stores = new ArrayList<>();
+        stores.addAll(folders);
+        stores.addAll(files);
+        return stores;
+    }
+
+    @Override
+    public List<FolderDTO> findRemovedFoldersByTrashId(long id) {
+        return folderRepository.findAllByTrashId(id).stream()
+                .map(folder -> convertToDTO(folder, View.FolderFileView.class))
+                .collect(Collectors.toList());
+    }
+
     @Async
     @Override
     public void removeFolder(UUID folderLink) {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
-        boolean isDeleted = folderUtils.removeElement(folder.getShortPath());
+        boolean isDeleted = folderUtils.removeElement(folder.getPath().getShortPath());
         if (isDeleted) {
             folderRepository.deleteFolderByLink(folderLink);
         }
@@ -134,8 +165,8 @@ public class FolderServiceImpl implements FolderService {
     public ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException {
         Folder folder = folderRepository.findFolderByLink(folderLink)
                 .orElseThrow(() -> new FolderNotFoundException(folderLink));
-        Path path = ZipUtils.createZip(folder.getName(), folder.getShortPath());
-        return FileUtils.getResource(path, folder.getShortPath());
+        Path path = ZipUtils.createZip(folder.getName(), folder.getPath().getShortPath());
+        return FileUtils.getResource(path, folder.getPath().getShortPath());
     }
 
     private FolderDTO convertToDTO(Folder folder, Class<?> classToCheck) {

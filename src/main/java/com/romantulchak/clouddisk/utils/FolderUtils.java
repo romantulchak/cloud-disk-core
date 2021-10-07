@@ -7,14 +7,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
 
-//TODO: fix files
+//TODO: work with exceptions
 @Component
 public class FolderUtils {
 
@@ -46,13 +44,26 @@ public class FolderUtils {
     public LocalPath createFolder(String folderName, String shortPath) {
         try {
             String folderPath = String.join("/", shortPath, folderName);
-              Path path = Paths.get(folderPath);
+            Path path = Paths.get(folderPath);
             Files.createDirectory(path);
             String fullPath = String.join("/", host, FOLDER_KEY, getFileRelativePath(folderPath));
             return new LocalPath(fullPath, folderPath);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("See logs");
+        }
+    }
+
+    public LocalPath createTrash(String trashName, String shortPath) {
+        try {
+            String trashPath = String.join("/", shortPath, trashName);
+            Path path = Paths.get(trashPath);
+            Files.createDirectory(path);
+            String fullPath = "";
+            return new LocalPath(fullPath, trashPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("see logs");
         }
     }
 
@@ -69,12 +80,14 @@ public class FolderUtils {
         }
     }
 
-    public boolean removeElement(String folderPath){
+    public boolean removeElement(String folderPath) {
         Path path = Paths.get(folderPath);
-        try(Stream<Path> walk = Files.walk(path)) {
+        try (Stream<Path> walk = Files.walk(path)) {
             walk.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
+            return true;
+        } catch (NoSuchFileException ex) {
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,7 +95,19 @@ public class FolderUtils {
         }
     }
 
-    private String getFileRelativePath(String path){
+    public boolean moveFileToTrash(String filePath, String trashPath){
+        try {
+            Path shortTrashPath = Paths.get(String.join("/", trashPath, getFileRelativePath(filePath)));
+            Path shortFilePath = Paths.get(filePath);
+            Files.move(shortFilePath, shortTrashPath, StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("See logs");
+        }
+    }
+
+    private String getFileRelativePath(String path) {
         return path.replaceAll("[A-z]*:\\\\[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]*(?=[a-zA-Z-])[0-9a-fA-F]{8}[0-9a-fA-F]{4}[0-9a-fA-F]{4}[0-9a-fA-F]{4}[0-9a-fA-F]{12}/", "");
 
     }
