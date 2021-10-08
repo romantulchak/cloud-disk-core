@@ -1,6 +1,5 @@
 package com.romantulchak.clouddisk.access;
 
-import com.romantulchak.clouddisk.model.File;
 import com.romantulchak.clouddisk.repository.FileRepository;
 import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;
 import org.springframework.security.core.Authentication;

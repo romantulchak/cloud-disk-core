@@ -30,7 +30,7 @@ public class TrashServiceImpl implements TrashService {
         Trash trash = new Trash()
                 .setName(name)
                 .setDrive(drive);
-        LocalPath path = folderUtils.createTrash(name, drive.getShortPath());
+        String path = folderUtils.createTrash(name, drive.getShortPath());
         trash.setPath(path);
         return trashRepository.save(trash);
     }

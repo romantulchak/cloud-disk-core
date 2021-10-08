@@ -1,5 +1,7 @@
 package com.romantulchak.clouddisk.model;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -22,8 +24,7 @@ public class Trash {
     @OneToMany(mappedBy = "trash")
     private List<Folder> folders;
 
-    @Embedded
-    private LocalPath path;
+    private String path;
 
     public long getId() {
         return id;
@@ -65,16 +66,15 @@ public class Trash {
         return folders;
     }
 
-    public Trash setFolders(List<Folder> folders) {
+    public void setFolders(List<Folder> folders) {
         this.folders = folders;
-        return this;
     }
 
-    public LocalPath getPath() {
+    public String getPath() {
         return path;
     }
 
-    public Trash setPath(LocalPath path) {
+    public Trash setPath(String path) {
         this.path = path;
         return this;
     }

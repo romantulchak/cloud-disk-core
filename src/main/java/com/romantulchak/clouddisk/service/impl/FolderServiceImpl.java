@@ -58,6 +58,7 @@ public class FolderServiceImpl implements FolderService {
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
+    //TODO: add check if folder named doesn't exist
     @Override
     public FolderDTO create(String folderName, String driveName, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -167,6 +168,11 @@ public class FolderServiceImpl implements FolderService {
                 .orElseThrow(() -> new FolderNotFoundException(folderLink));
         Path path = ZipUtils.createZip(folder.getName(), folder.getPath().getShortPath());
         return FileUtils.getResource(path, folder.getPath().getShortPath());
+    }
+
+    @Override
+    public void preRemoveFolder(UUID folderLink) {
+
     }
 
     private FolderDTO convertToDTO(Folder folder, Class<?> classToCheck) {

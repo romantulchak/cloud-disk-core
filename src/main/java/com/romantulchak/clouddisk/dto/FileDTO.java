@@ -53,6 +53,10 @@ public class FileDTO implements Store {
     @MapToDTO(mapClass = {View.FolderFileView.class})
     private ContextType context = ContextType.FILE;
 
+    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class})
+    private LocalPathDTO path;
+
     public long getId() {
         return id;
     }
@@ -147,5 +151,13 @@ public class FileDTO implements Store {
 
     public void setContext(ContextType context) {
         this.context = context;
+    }
+
+    public LocalPathDTO getPath() {
+        return path;
+    }
+
+    public void setPath(LocalPathDTO path) {
+        this.path = path;
     }
 }

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS folder
 (
     id              bigserial   not null primary key,
-    name            varchar(90) not null unique,
+    name            varchar(90) not null,
     drive_id        bigint references drive,
     link            uuid        not null,
     create_at       timestamp   not null default now(),
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS folder
 CREATE TABLE IF NOT EXISTS file
 (
     id              bigserial    not null primary key,
-    name            varchar(195) not null unique,
+    name            varchar(195) not null,
     create_at       timestamp    not null default now(),
     upload_at       timestamp    not null default now(),
     size            bigint       not null default 0,

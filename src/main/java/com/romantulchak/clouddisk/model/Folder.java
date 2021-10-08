@@ -3,73 +3,20 @@ package com.romantulchak.clouddisk.model;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@NamedEntityGraph(
-        name = "Folder.subFolders",
-        attributeNodes = @NamedAttributeNode("subFolders")
-)
 @Entity
-public class Folder {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @Column(unique = true)
-    @Size(max = 90)
-    private String name;
+@DiscriminatorValue(value = "Folder")
+public class Folder extends StoreAbstract{
 
     @OneToMany(orphanRemoval = true)
-    @JoinTable(name = "folder_subFolders")
+    @JoinTable(name = "folder_sub_folders")
     private List<Folder> subFolders;
-
-    @ManyToOne
-    private Drive drive;
-
-    private UUID link;
-
-    private LocalDateTime createAt;
-
-    private LocalDateTime uploadAt;
-
-    @ManyToOne
-    private User owner;
-
-    private boolean hasLinkAccess;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "folder", orphanRemoval = true)
     private List<File> files;
-
-    @ManyToOne
-    private Trash trash;
-
-    @Embedded
-    private LocalPath path;
-
-    @Enumerated(EnumType.STRING)
-    private RemoveType removeType = RemoveType.SAVED;
-
-    public long getId() {
-        return id;
-    }
-
-    public Folder setId(long id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Folder setName(String name) {
-        this.name = name;
-        return this;
-    }
 
     public List<Folder> getSubFolders() {
         return subFolders;
@@ -77,51 +24,6 @@ public class Folder {
 
     public Folder setSubFolders(List<Folder> subFolders) {
         this.subFolders = subFolders;
-        return this;
-    }
-
-    public Drive getDrive() {
-        return drive;
-    }
-
-    public Folder setDrive(Drive drive) {
-        this.drive = drive;
-        return this;
-    }
-
-    public boolean isHasLinkAccess() {
-        return hasLinkAccess;
-    }
-
-    public Folder setHasLinkAccess(boolean hasLinkAccess) {
-        this.hasLinkAccess = hasLinkAccess;
-        return this;
-    }
-
-    public UUID getLink() {
-        return link;
-    }
-
-    public Folder setLink(UUID link) {
-        this.link = link;
-        return this;
-    }
-
-    public LocalDateTime getCreateAt() {
-        return createAt;
-    }
-
-    public Folder setCreateAt(LocalDateTime createAt) {
-        this.createAt = createAt;
-        return this;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public Folder setOwner(User owner) {
-        this.owner = owner;
         return this;
     }
 
@@ -134,39 +36,76 @@ public class Folder {
         return this;
     }
 
-    public LocalDateTime getUploadAt() {
-        return uploadAt;
+    @Override
+    public Folder setId(long id) {
+        super.setId(id);
+        return this;
     }
 
+    @Override
+    public Folder setName(String name) {
+        super.setName(name);
+        return this;
+    }
+
+    @Override
+    public Folder setCreateAt(LocalDateTime createAt) {
+        super.setCreateAt(createAt);
+        return this;
+
+    }
+
+    @Override
     public Folder setUploadAt(LocalDateTime uploadAt) {
-        this.uploadAt = uploadAt;
+        super.setUploadAt(uploadAt);
         return this;
     }
 
-    public Trash getTrash() {
-        return trash;
-    }
-
+    @Override
     public Folder setTrash(Trash trash) {
-        this.trash = trash;
+        super.setTrash(trash);
         return this;
     }
 
-    public LocalPath getPath() {
-        return path;
-    }
-
+    @Override
     public Folder setPath(LocalPath path) {
-        this.path = path;
+        super.setPath(path);
         return this;
     }
 
-    public RemoveType getRemoveType() {
-        return removeType;
+    @Override
+    public Folder setRemoveType(RemoveType removeType) {
+        super.setRemoveType(removeType);
+        return this;
     }
 
-    public Folder setRemoveType(RemoveType removeType) {
-        this.removeType = removeType;
+    @Override
+    public Folder setDrive(Drive drive) {
+        super.setDrive(drive);
+        return this;
+    }
+
+    @Override
+    public Folder setLink(UUID link) {
+        super.setLink(link);
+        return this;
+    }
+
+    @Override
+    public Folder setHasLinkAccess(boolean hasLinkAccess) {
+        super.setHasLinkAccess(hasLinkAccess);
+        return this;
+    }
+
+    @Override
+    public Folder setOwner(User owner) {
+        super.setOwner(owner);
+        return this;
+    }
+
+    @Override
+    public Folder setRemove(PreRemove remove) {
+        super.setRemove(remove);
         return this;
     }
 }

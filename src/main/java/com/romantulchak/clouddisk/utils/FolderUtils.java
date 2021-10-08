@@ -32,7 +32,7 @@ public class FolderUtils {
             String shorPath = String.join("/", drivePath, driveName);
             Path path = Paths.get(shorPath);
             Files.createDirectory(path);
-            String fullPath = String.join("/", host, FOLDER_KEY, driveName);
+            String fullPath = getFullPath(driveName);
             return new LocalPath(fullPath, shorPath);
         } catch (IOException e) {
             e.printStackTrace();
@@ -46,7 +46,7 @@ public class FolderUtils {
             String folderPath = String.join("/", shortPath, folderName);
             Path path = Paths.get(folderPath);
             Files.createDirectory(path);
-            String fullPath = String.join("/", host, FOLDER_KEY, getFileRelativePath(folderPath));
+            String fullPath = getFullPath(getFileRelativePath(folderPath));
             return new LocalPath(fullPath, folderPath);
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,30 +54,35 @@ public class FolderUtils {
         }
     }
 
-    public LocalPath createTrash(String trashName, String shortPath) {
+    public String createTrash(String trashName, String shortPath) {
         try {
             String trashPath = String.join("/", shortPath, trashName);
             Path path = Paths.get(trashPath);
             Files.createDirectory(path);
             String fullPath = "";
-            return new LocalPath(fullPath, trashPath);
+            return trashPath;
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("see logs");
         }
     }
 
+    //TODO: fix FULL PATH without user folder
     public LocalPath uploadFile(MultipartFile multipartFile, String shortPath) {
         try {
             shortPath = String.join("/", shortPath, multipartFile.getOriginalFilename());
             Path path = Paths.get(shortPath);
-            String fullPath = String.join("/", host, FOLDER_KEY, getFileRelativePath(shortPath));
+            String fullPath = getFullPath(getFileRelativePath(shortPath));
             multipartFile.transferTo(path);
             return new LocalPath(fullPath, shortPath);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("See logs");
         }
+    }
+
+    private String getFullPath(String fileRelativePath) {
+        return String.join("/", host, FOLDER_KEY, fileRelativePath);
     }
 
     public boolean removeElement(String folderPath) {
@@ -95,21 +100,22 @@ public class FolderUtils {
         }
     }
 
-    public boolean moveFileToTrash(String filePath, String trashPath){
+    public LocalPath moveFileToTrash(String filePath, String trashPath, String filename){
         try {
-            Path shortTrashPath = Paths.get(String.join("/", trashPath, getFileRelativePath(filePath)));
+            String localPath = String.join("/", trashPath, filename);
+            Path shortTrashPath = Paths.get(localPath);
             Path shortFilePath = Paths.get(filePath);
             Files.move(shortFilePath, shortTrashPath, StandardCopyOption.REPLACE_EXISTING);
-            return true;
+            return new LocalPath(getFullPath(getFileRelativePath(localPath)), localPath);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("See logs");
         }
     }
 
+    //TODO: fix regex
     private String getFileRelativePath(String path) {
-        return path.replaceAll("[A-z]*:\\\\[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]*(?=[a-zA-Z-])[0-9a-fA-F]{8}[0-9a-fA-F]{4}[0-9a-fA-F]{4}[0-9a-fA-F]{4}[0-9a-fA-F]{12}/", "");
-
+        return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
     }
 
 }

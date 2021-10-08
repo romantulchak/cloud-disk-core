@@ -2,15 +2,13 @@ package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.FileDTO;
-import com.romantulchak.clouddisk.exception.DriveNotFoundException;
-import com.romantulchak.clouddisk.exception.FileNotFoundException;
-import com.romantulchak.clouddisk.exception.FileWithNameAlreadyExistsException;
-import com.romantulchak.clouddisk.exception.FolderNotFoundException;
+import com.romantulchak.clouddisk.exception.*;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.FileRepository;
 import com.romantulchak.clouddisk.repository.FolderRepository;
+import com.romantulchak.clouddisk.repository.PreRemoveRepository;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FileUtils;
@@ -20,12 +18,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -39,6 +40,7 @@ public class FileServiceImpl implements FileService {
     private final FolderUtils folderUtils;
     private final DriveRepository driveRepository;
     private final TrashService trashService;
+    private final PreRemoveRepository removeRepository;
     private final EntityMapperInvoker<File, FileDTO> entityMapperInvoker;
 
     public FileServiceImpl(FileRepository fileRepository,
@@ -46,12 +48,14 @@ public class FileServiceImpl implements FileService {
                            FolderUtils folderUtils,
                            TrashService trashService,
                            DriveRepository driveRepository,
+                           PreRemoveRepository removeRepository,
                            EntityMapperInvoker<File, FileDTO> entityMapperInvoker) {
         this.fileRepository = fileRepository;
         this.folderRepository = folderRepository;
         this.folderUtils = folderUtils;
         this.driveRepository = driveRepository;
         this.trashService = trashService;
+        this.removeRepository = removeRepository;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
@@ -130,17 +134,31 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    @Transactional
     @Override
     public void preDeleteFile(UUID fileLink, String driveName) {
         File file = fileRepository.findFileByLink(fileLink)
                 .orElseThrow(() -> new FileNotFoundException(fileLink));
-        Trash trash = trashService.getTrashByDriveName(driveName);
-        file.setRemoveType(RemoveType.PRE_REMOVED)
-                .setTrash(trash);
-        boolean isMoved = folderUtils.moveFileToTrash(file.getPath().getShortPath(), trash.getPath().getShortPath());
-        if (isMoved) {
+        if (file.getRemoveType() != RemoveType.PRE_REMOVED) {
+            Trash trash = trashService.getTrashByDriveName(driveName);
+            LocalPath path = folderUtils.moveFileToTrash(file.getPath().getShortPath(), trash.getPath(), file.getName());
+            LocalPath newPath = new LocalPath()
+                    .setOldPath(file.getPath().getShortPath())
+                    .setShortPath(file.getPath().getShortPath())
+                    .setFullPath(path.getFullPath());
+            file.setRemoveType(RemoveType.PRE_REMOVED)
+                    .setTrash(trash)
+                    .setPath(newPath);
             fileRepository.save(file);
+            createPreRemove(file, path.getShortPath());
+        } else {
+            throw new ObjectAlreadyPreRemovedException(file.getName());
         }
+    }
+
+    private void createPreRemove(File file, String pathInTrash) {
+        PreRemove remove = new PreRemove(LocalDate.now(), LocalDate.now(), file, pathInTrash);
+        removeRepository.save(remove);
     }
 
     @Override

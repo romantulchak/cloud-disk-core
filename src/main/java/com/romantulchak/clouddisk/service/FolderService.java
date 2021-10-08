@@ -30,4 +30,6 @@ public interface FolderService {
     void removeFolder(UUID folderLink);
 
     ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException;
+
+    void preRemoveFolder(UUID folderLink);
 }

@@ -17,7 +17,6 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
 
     List<Folder> findAllByDriveNameAndRemoveType(String driveName, RemoveType removeType);
 
-    @EntityGraph(value = "Folder.subFolders")
     Optional<Folder> findFolderByLink(UUID link);
 
     @Query(value = "SELECT DISTINCT id, create_at, has_link_access, link, name, upload_at, drive_id, owner_id, full_path, short_path, remove_type, trash_id" +

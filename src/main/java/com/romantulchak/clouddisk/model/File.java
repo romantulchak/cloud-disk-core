@@ -5,82 +5,26 @@ import com.romantulchak.clouddisk.model.enums.RemoveType;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-public class File {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @Size(max = 195)
-    @Column(unique = true)
-    private String name;
-
-    private LocalDateTime createAt;
-
-    private LocalDateTime uploadAt;
+@DiscriminatorValue(value = "File")
+public class File extends StoreAbstract{
 
     private long size;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Folder folder;
-
-    @ManyToOne
-    private Drive drive;
-
-    private UUID link;
-
-    private boolean hasLinkAccess;
-
-    @ManyToOne
-    private User owner;
 
     private String extension;
 
-    @ManyToOne
-    private Trash trash;
-
-    @Embedded
-    private LocalPath path;
-
-    @Enumerated(EnumType.STRING)
-    private RemoveType removeType = RemoveType.SAVED;
-
-    public long getId() {
-        return id;
+    public long getSize() {
+        return size;
     }
 
-    public File setId(long id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public File setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public LocalDateTime getCreateAt() {
-        return createAt;
-    }
-
-    public File setCreateAt(LocalDateTime createAt) {
-        this.createAt = createAt;
-        return this;
-    }
-
-    public LocalDateTime getUploadAt() {
-        return uploadAt;
-    }
-
-    public File setUploadAt(LocalDateTime uploadAt) {
-        this.uploadAt = uploadAt;
+    public File setSize(long size) {
+        this.size = size;
         return this;
     }
 
@@ -93,51 +37,6 @@ public class File {
         return this;
     }
 
-    public Drive getDrive() {
-        return drive;
-    }
-
-    public File setDrive(Drive drive) {
-        this.drive = drive;
-        return this;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public File setSize(long size) {
-        this.size = size;
-        return this;
-    }
-
-    public UUID getLink() {
-        return link;
-    }
-
-    public File setLink(UUID link) {
-        this.link = link;
-        return this;
-    }
-
-    public boolean isHasLinkAccess() {
-        return hasLinkAccess;
-    }
-
-    public File setHasLinkAccess(boolean hasLinkAccess) {
-        this.hasLinkAccess = hasLinkAccess;
-        return this;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public File setOwner(User owner) {
-        this.owner = owner;
-        return this;
-    }
-
     public String getExtension() {
         return extension;
     }
@@ -147,30 +46,76 @@ public class File {
         return this;
     }
 
-    public Trash getTrash() {
-        return trash;
+    @Override
+    public File setId(long id) {
+        super.setId(id);
+        return this;
     }
 
+    @Override
+    public File setName(String name) {
+        super.setName(name);
+        return this;
+    }
+
+    @Override
+    public File setCreateAt(LocalDateTime createAt) {
+        super.setCreateAt(createAt);
+        return this;
+
+    }
+
+    @Override
+    public File setUploadAt(LocalDateTime uploadAt) {
+        super.setUploadAt(uploadAt);
+        return this;
+    }
+
+    @Override
     public File setTrash(Trash trash) {
-        this.trash = trash;
+        super.setTrash(trash);
         return this;
     }
 
-    public LocalPath getPath() {
-        return path;
-    }
-
+    @Override
     public File setPath(LocalPath path) {
-        this.path = path;
+        super.setPath(path);
         return this;
     }
 
-    public RemoveType getRemoveType() {
-        return removeType;
+    @Override
+    public File setRemoveType(RemoveType removeType) {
+        super.setRemoveType(removeType);
+        return this;
     }
 
-    public File setRemoveType(RemoveType removeType) {
-        this.removeType = removeType;
+    @Override
+    public File setDrive(Drive drive) {
+        super.setDrive(drive);
+        return this;
+    }
+
+    @Override
+    public File setLink(UUID link) {
+        super.setLink(link);
+        return this;
+    }
+
+    @Override
+    public File setHasLinkAccess(boolean hasLinkAccess) {
+        super.setHasLinkAccess(hasLinkAccess);
+        return this;
+    }
+
+    @Override
+    public File setOwner(User owner) {
+        super.setOwner(owner);
+        return this;
+    }
+
+    @Override
+    public File setRemove(PreRemove remove) {
+        super.setRemove(remove);
         return this;
     }
 }
