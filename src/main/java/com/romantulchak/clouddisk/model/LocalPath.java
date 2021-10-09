@@ -7,7 +7,8 @@ public class LocalPath {
 
     private String fullPath;
     private String shortPath;
-    private String oldPath;
+    private String oldFullPath;
+    private String oldShortPath;
 
     public LocalPath(String fullPath, String shortPath) {
         this.fullPath = fullPath;
@@ -38,12 +39,21 @@ public class LocalPath {
         return this;
     }
 
-    public String getOldPath() {
-        return oldPath;
+    public String getOldFullPath() {
+        return oldFullPath;
     }
 
-    public LocalPath setOldPath(String oldPath) {
-        this.oldPath = oldPath;
+    public LocalPath setOldFullPath(String oldFullPath) {
+        this.oldFullPath = oldFullPath;
+        return this;
+    }
+
+    public String getOldShortPath() {
+        return oldShortPath;
+    }
+
+    public LocalPath setOldShortPath(String oldShortPath) {
+        this.oldShortPath = oldShortPath;
         return this;
     }
 }

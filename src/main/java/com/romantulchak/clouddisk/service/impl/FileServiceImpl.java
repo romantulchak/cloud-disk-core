@@ -143,8 +143,9 @@ public class FileServiceImpl implements FileService {
             Trash trash = trashService.getTrashByDriveName(driveName);
             LocalPath path = folderUtils.moveFileToTrash(file.getPath().getShortPath(), trash.getPath(), file.getName());
             LocalPath newPath = new LocalPath()
-                    .setOldPath(file.getPath().getShortPath())
-                    .setShortPath(file.getPath().getShortPath())
+                    .setOldFullPath(file.getPath().getFullPath())
+                    .setOldShortPath(file.getPath().getShortPath())
+                    .setShortPath(path.getShortPath())
                     .setFullPath(path.getFullPath());
             file.setRemoveType(RemoveType.PRE_REMOVED)
                     .setTrash(trash)
@@ -153,6 +154,28 @@ public class FileServiceImpl implements FileService {
             createPreRemove(file, path.getShortPath());
         } else {
             throw new ObjectAlreadyPreRemovedException(file.getName());
+        }
+    }
+
+    @Transactional
+    @Override
+    public void restoreFile(UUID fileLink) {
+        File file = fileRepository.findFileByLink(fileLink)
+                .orElseThrow(() -> new FileNotFoundException(fileLink));
+        if(file.getRemoveType() == RemoveType.PRE_REMOVED){
+            LocalPath path = new LocalPath()
+                    .setFullPath(file.getPath().getOldFullPath())
+                    .setShortPath(file.getPath().getOldShortPath())
+                    .setOldFullPath(file.getPath().getFullPath())
+                    .setOldShortPath(file.getPath().getShortPath());
+            file.setRemoveType(RemoveType.SAVED)
+                    .setTrash(null)
+                    .setPath(path);
+            boolean isMoved = folderUtils.restoreFile(path.getOldShortPath(), path.getShortPath());
+            removeRepository.deleteByElementId(file.getId());
+            if(isMoved){
+                fileRepository.save(file);
+            }
         }
     }
 

@@ -154,4 +154,12 @@ public abstract class StoreAbstract {
         this.preRemove = remove;
         return this;
     }
+
+    public PreRemove getPreRemove() {
+        return preRemove;
+    }
+
+    public void setPreRemove(PreRemove preRemove) {
+        this.preRemove = preRemove;
+    }
 }

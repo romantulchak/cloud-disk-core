@@ -1,6 +1,7 @@
 package com.romantulchak.clouddisk.utils;
 
 import com.romantulchak.clouddisk.model.LocalPath;
+import org.apache.commons.lang3.SystemUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,7 +60,6 @@ public class FolderUtils {
             String trashPath = String.join("/", shortPath, trashName);
             Path path = Paths.get(trashPath);
             Files.createDirectory(path);
-            String fullPath = "";
             return trashPath;
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,9 +113,25 @@ public class FolderUtils {
         }
     }
 
+    public boolean restoreFile(String oldPath, String newPath) {
+        try {
+            Path oldShortPath = Paths.get(oldPath);
+            Path newShortPath = Paths.get(newPath);
+            Files.move(oldShortPath, newShortPath);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("See logs");
+        }
+    }
+
     //TODO: fix regex
     private String getFileRelativePath(String path) {
-        return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
+        String osName = SystemUtils.OS_NAME;
+        if (osName.contains("Windows")){
+            return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
+        }
+        return path.replace("\\/home\\/cloud-disk-files\\/", "");
     }
 
 }

@@ -38,7 +38,7 @@ public class TrashCleaner {
         this.folderUtils = folderUtils;
     }
 
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void trashClean() {
         List<PreRemove> all = removeRepository.findAllByRemoveDate(LocalDate.now());
         for (PreRemove preRemove : all) {

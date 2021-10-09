@@ -57,4 +57,10 @@ public class FileController {
     public void preDeleteFile(@PathVariable("fileLink") UUID fileLink, @RequestBody String driveName){
         fileService.preDeleteFile(fileLink, driveName);
     }
+
+    @PutMapping("/restore-file/{fileLink}")
+    @PreAuthorize("hasRole('USER') AND @userFileAccess.hasAccess(#fileLink, authentication)")
+    public void restoreFile(@PathVariable("fileLink") UUID fileLink){
+        fileService.restoreFile(fileLink);
+    }
 }
