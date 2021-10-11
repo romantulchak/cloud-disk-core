@@ -11,21 +11,20 @@ import com.romantulchak.clouddisk.repository.TrashRepository;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
 public class TrashCleaner {
 
-    private PreRemoveRepository removeRepository;
-    private FileRepository fileRepository;
-    private FolderRepository folderRepository;
-    private FolderUtils folderUtils;
+    private final PreRemoveRepository removeRepository;
+    private final FileRepository fileRepository;
+    private final FolderRepository folderRepository;
+    private final FolderUtils folderUtils;
 
     @Autowired
     public TrashCleaner(PreRemoveRepository removeRepository,
@@ -38,6 +37,7 @@ public class TrashCleaner {
         this.folderUtils = folderUtils;
     }
 
+    @Async
     @Scheduled(cron = "0 */10 * * * *")
     public void trashClean() {
         List<PreRemove> all = removeRepository.findAllByRemoveDate(LocalDate.now());

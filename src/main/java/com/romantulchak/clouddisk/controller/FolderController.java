@@ -63,8 +63,8 @@ public class FolderController {
 
     @PutMapping("/pre-remove/{folderLink}")
     @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
-    public void preRemoveFolder(@PathVariable("folderLink") UUID folderLink){
-        folderService.preRemoveFolder(folderLink);
+    public void preRemoveFolder(@PathVariable("folderLink") UUID folderLink, @RequestBody String driveName){
+        folderService.preRemoveFolder(folderLink, driveName);
     }
 
     @GetMapping("/download-folder/{folderLink}")
@@ -78,5 +78,12 @@ public class FolderController {
     @JsonView(View.FolderFileView.class)
     public List<Store> getRemovedElements(@PathVariable("driveName") String driveName){
         return folderService.findRemovedElements(driveName);
+    }
+
+    @PutMapping("/change-color/{folderLink}")
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
+    @JsonView(View.FolderFileView.class)
+    public FolderDTO changeColor(@PathVariable("folderLink") UUID folderLink, @RequestBody String color){
+        return folderService.changeColor(folderLink, color);
     }
 }

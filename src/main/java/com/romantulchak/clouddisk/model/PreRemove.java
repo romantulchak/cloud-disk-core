@@ -28,9 +28,9 @@ public class PreRemove {
     public PreRemove() {
     }
 
-    public PreRemove(LocalDate removeDate, LocalDate addedToTrash, StoreAbstract element, String path) {
-        this.removeDate = removeDate;
-        this.addedToTrash = addedToTrash;
+    public PreRemove(StoreAbstract element, String path) {
+        this.removeDate = LocalDate.now().plusMonths(1);
+        this.addedToTrash = LocalDate.now();
         this.element = element;
         this.path = path;
     }

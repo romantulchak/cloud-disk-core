@@ -40,10 +40,10 @@ public class FileController {
         return fileService.uploadFileIntoDrive(file, driveName, authentication).get();
     }
 
-    @DeleteMapping("/delete-file/{file}")
+    @DeleteMapping("/delete-file/{fileLink}")
     @PreAuthorize("hasRole('USER') AND @userFileAccess.hasAccess(#fileLink, authentication)")
-    public void deleteFileInFolder(@PathVariable("file") UUID fileLink) {
-        fileService.deleteFileInFolder(fileLink);
+    public void deleteFileInFolder(@PathVariable("fileLink") UUID fileLink) {
+        fileService.fullDeleteFile(fileLink);
     }
 
     @GetMapping(value = "/download-file/{fileLink}")

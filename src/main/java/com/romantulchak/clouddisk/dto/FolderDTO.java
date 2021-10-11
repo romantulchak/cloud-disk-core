@@ -6,6 +6,7 @@ import com.mapperDTO.annotation.MapToDTO;
 import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.model.enums.ContextType;
+import com.romantulchak.clouddisk.model.enums.FolderColorType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,10 @@ public class FolderDTO implements Store {
     @JsonView({View.FolderFileView.class,View.FolderView.class})
     @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
     private String name;
+
+    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
+    private String color;
 
     private List<FolderDTO> subFolders;
 
@@ -134,5 +139,13 @@ public class FolderDTO implements Store {
 
     public void setContext(ContextType context) {
         this.context = context;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }

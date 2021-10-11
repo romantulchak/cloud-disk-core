@@ -31,6 +31,10 @@ public class FolderUtils {
     public LocalPath createDrive(String driveName) {
         try {
             String shorPath = String.join("/", drivePath, driveName);
+            File file = new File(drivePath);
+            if(!file.exists()){
+                file.mkdir();
+            }
             Path path = Paths.get(shorPath);
             Files.createDirectory(path);
             String fullPath = getFullPath(driveName);
@@ -131,7 +135,7 @@ public class FolderUtils {
         if (osName.contains("Windows")){
             return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
         }
-        return path.replace("\\/home\\/cloud-disk-files\\/", "");
+        return path.replace("home\\/cloud-disk-files\\/", "");
     }
 
 }

@@ -44,7 +44,7 @@ public abstract class StoreAbstract {
     @ManyToOne
     private User owner;
 
-    @OneToOne(mappedBy = "element")
+    @OneToOne(mappedBy = "element", orphanRemoval = true)
     private PreRemove preRemove;
 
     public long getId() {

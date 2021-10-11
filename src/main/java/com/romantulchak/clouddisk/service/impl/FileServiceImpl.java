@@ -13,6 +13,7 @@ import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
+import com.romantulchak.clouddisk.utils.StoreUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -24,9 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -125,15 +124,16 @@ public class FileServiceImpl implements FileService {
         return CompletableFuture.completedFuture(convertToDTO(file, View.FolderFileView.class));
     }
 
+    @Transactional
     @Override
-    public void deleteFileInFolder(UUID fileLink) {
+    public void fullDeleteFile(UUID fileLink) {
         File file = fileRepository.findFileByLink(fileLink).orElseThrow(() -> new FileNotFoundException(fileLink));
+        removeRepository.deleteByElementId(file.getId());
         boolean isDeleted = folderUtils.removeElement(file.getPath().getShortPath());
         if (isDeleted) {
             fileRepository.delete(file);
         }
     }
-
     @Transactional
     @Override
     public void preDeleteFile(UUID fileLink, String driveName) {
@@ -141,15 +141,7 @@ public class FileServiceImpl implements FileService {
                 .orElseThrow(() -> new FileNotFoundException(fileLink));
         if (file.getRemoveType() != RemoveType.PRE_REMOVED) {
             Trash trash = trashService.getTrashByDriveName(driveName);
-            LocalPath path = folderUtils.moveFileToTrash(file.getPath().getShortPath(), trash.getPath(), file.getName());
-            LocalPath newPath = new LocalPath()
-                    .setOldFullPath(file.getPath().getFullPath())
-                    .setOldShortPath(file.getPath().getShortPath())
-                    .setShortPath(path.getShortPath())
-                    .setFullPath(path.getFullPath());
-            file.setRemoveType(RemoveType.PRE_REMOVED)
-                    .setTrash(trash)
-                    .setPath(newPath);
+            LocalPath path = StoreUtils.preRemoveElement(file, folderUtils, trash);
             fileRepository.save(file);
             createPreRemove(file, path.getShortPath());
         } else {
@@ -180,7 +172,7 @@ public class FileServiceImpl implements FileService {
     }
 
     private void createPreRemove(File file, String pathInTrash) {
-        PreRemove remove = new PreRemove(LocalDate.now(), LocalDate.now(), file, pathInTrash);
+        PreRemove remove = new PreRemove(file, pathInTrash);
         removeRepository.save(remove);
     }
 

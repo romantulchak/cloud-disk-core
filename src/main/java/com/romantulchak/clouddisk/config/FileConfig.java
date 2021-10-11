@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
+import org.springframework.web.util.UrlPathHelper;
 
 @Configuration
 public class FileConfig implements WebMvcConfigurer {
@@ -24,6 +25,6 @@ public class FileConfig implements WebMvcConfigurer {
                 .addResourceLocations(location)
                 .setCachePeriod(0)
                 .resourceChain(true)
-                .addResolver(new PathResourceResolver());
+                .addResolver(new CustomPathResourceResolver());
     }
 }

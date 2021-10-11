@@ -1,5 +1,6 @@
 package com.romantulchak.clouddisk.model;
 
+import com.romantulchak.clouddisk.model.enums.FolderColorType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 
 import javax.persistence.*;
@@ -17,6 +18,12 @@ public class Folder extends StoreAbstract{
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "folder", orphanRemoval = true)
     private List<File> files;
+
+    private String color;
+
+    public Folder() {
+        this.color = FolderColorType.MOUSE.getColor();
+    }
 
     public List<Folder> getSubFolders() {
         return subFolders;
@@ -106,6 +113,15 @@ public class Folder extends StoreAbstract{
     @Override
     public Folder setRemove(PreRemove remove) {
         super.setRemove(remove);
+        return this;
+    }
+
+    public String  getColor() {
+        return color;
+    }
+
+    public Folder setColor(String color) {
+        this.color = color;
         return this;
     }
 }

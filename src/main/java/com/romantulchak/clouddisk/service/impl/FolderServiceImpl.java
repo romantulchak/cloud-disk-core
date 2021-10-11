@@ -10,11 +10,14 @@ import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.FolderRepository;
+import com.romantulchak.clouddisk.repository.PreRemoveRepository;
 import com.romantulchak.clouddisk.repository.TrashRepository;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
+import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
+import com.romantulchak.clouddisk.utils.StoreUtils;
 import com.romantulchak.clouddisk.utils.ZipUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -26,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +44,7 @@ public class FolderServiceImpl implements FolderService {
     private final FileService fileService;
     private final FolderUtils folderUtils;
     private final TrashRepository trashRepository;
+    private final PreRemoveRepository removeRepository;
     private final EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker;
 
 
@@ -49,12 +54,15 @@ public class FolderServiceImpl implements FolderService {
                              FileService fileService,
                              FolderUtils folderUtils,
                              TrashRepository trashRepository,
+                             PreRemoveRepository removeRepository,
+                             TrashService trashService,
                              EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker) {
         this.folderRepository = folderRepository;
         this.driveRepository = driveRepository;
         this.fileService = fileService;
         this.folderUtils = folderUtils;
         this.trashRepository = trashRepository;
+        this.removeRepository = removeRepository;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
@@ -158,6 +166,7 @@ public class FolderServiceImpl implements FolderService {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
         boolean isDeleted = folderUtils.removeElement(folder.getPath().getShortPath());
         if (isDeleted) {
+//            removeRepository.deleteByElementId(folder.getId());
             folderRepository.deleteFolderByLink(folderLink);
         }
     }
@@ -170,9 +179,29 @@ public class FolderServiceImpl implements FolderService {
         return FileUtils.getResource(path, folder.getPath().getShortPath());
     }
 
+    @Transactional
     @Override
-    public void preRemoveFolder(UUID folderLink) {
+    public void preRemoveFolder(UUID folderLink, String driveName) {
+        Folder folder = findFolderByLink(folderLink);
+        if(folder.getRemoveType() != RemoveType.PRE_REMOVED){
+            Trash trash = trashRepository.findTrashByDriveName(driveName)
+                    .orElseThrow(() -> new TrashNotFoundException(driveName));
+            LocalPath path = StoreUtils.preRemoveElement(folder, folderUtils, trash);
+            folder = folderRepository.save(folder);
+            PreRemove preRemove = new PreRemove(folder, path.getShortPath());
+            removeRepository.save(preRemove);
 
+        }
+    }
+
+    @Override
+    public FolderDTO changeColor(UUID folderLink, String color) {
+        Folder folder = findFolderByLink(folderLink);
+        if(!folder.getColor().equals(color)){
+            folder.setColor(color);
+            folderRepository.save(folder);
+        }
+        return convertToDTO(folder, View.FolderFileView.class);
     }
 
     private FolderDTO convertToDTO(Folder folder, Class<?> classToCheck) {
