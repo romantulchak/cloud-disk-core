@@ -6,12 +6,14 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @DiscriminatorColumn(name = "store_type")
-public abstract class StoreAbstract {
+public abstract class StoreAbstract implements Comparable<StoreAbstract> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -122,7 +124,7 @@ public abstract class StoreAbstract {
     public UUID getLink() {
         return link;
     }
-    
+
     public StoreAbstract setLink(UUID link) {
         this.link = link;
         return this;
@@ -159,7 +161,28 @@ public abstract class StoreAbstract {
         return preRemove;
     }
 
-    public void setPreRemove(PreRemove preRemove) {
+    public StoreAbstract setPreRemove(PreRemove preRemove) {
         this.preRemove = preRemove;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StoreAbstract)) return false;
+        StoreAbstract that = (StoreAbstract) o;
+        return id == that.id && Objects.equals(name, that.name) && Objects.equals(createAt, that.createAt) && Objects.equals(link, that.link);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, createAt, link);
+    }
+
+    @Override
+    public int compareTo(StoreAbstract o) {
+        return Comparator.comparing(StoreAbstract::getName)
+                .thenComparing(StoreAbstract::getCreateAt)
+                .compare(this, o);
     }
 }

@@ -23,7 +23,7 @@ public interface FileService {
 
     CompletableFuture<FileDTO> uploadFileIntoDrive(MultipartFile file, String driveName, Authentication authentication);
 
-    void fullDeleteFile(UUID fileLink);
+    void deleteFile(UUID fileLink);
 
     void preDeleteFile(UUID fileLink, String driveName);
 

@@ -126,9 +126,8 @@ public class FileServiceImpl implements FileService {
 
     @Transactional
     @Override
-    public void fullDeleteFile(UUID fileLink) {
+    public void deleteFile(UUID fileLink) {
         File file = fileRepository.findFileByLink(fileLink).orElseThrow(() -> new FileNotFoundException(fileLink));
-        removeRepository.deleteByElementId(file.getId());
         boolean isDeleted = folderUtils.removeElement(file.getPath().getShortPath());
         if (isDeleted) {
             fileRepository.delete(file);

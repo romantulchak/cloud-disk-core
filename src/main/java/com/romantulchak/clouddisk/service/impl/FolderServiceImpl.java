@@ -108,6 +108,7 @@ public class FolderServiceImpl implements FolderService {
     public List<Store> findAllFoldersForDrive(String driveName) {
         List<FolderDTO> folders = folderRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED)
                 .stream()
+                .sorted()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
         List<FileDTO> files = fileService.findFilesInDrive(driveName);
@@ -128,10 +129,12 @@ public class FolderServiceImpl implements FolderService {
         return convertToDTO(subFolder, View.FolderView.class);
     }
 
+    //TODO: fix
     @Override
     public List<Store> findSubFoldersInFolder(UUID folderLink) {
         List<FolderDTO> subFolders = folderRepository.findSubFolders(folderLink, RemoveType.SAVED.name())
                 .stream()
+                .sorted()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
         List<FileDTO> filesInFolder = fileService.findFilesInFolder(folderLink);
@@ -166,7 +169,6 @@ public class FolderServiceImpl implements FolderService {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
         boolean isDeleted = folderUtils.removeElement(folder.getPath().getShortPath());
         if (isDeleted) {
-//            removeRepository.deleteByElementId(folder.getId());
             folderRepository.deleteFolderByLink(folderLink);
         }
     }

@@ -43,7 +43,7 @@ public class FileController {
     @DeleteMapping("/delete-file/{fileLink}")
     @PreAuthorize("hasRole('USER') AND @userFileAccess.hasAccess(#fileLink, authentication)")
     public void deleteFileInFolder(@PathVariable("fileLink") UUID fileLink) {
-        fileService.fullDeleteFile(fileLink);
+        fileService.deleteFile(fileLink);
     }
 
     @GetMapping(value = "/download-file/{fileLink}")
