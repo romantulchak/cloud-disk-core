@@ -1,5 +1,6 @@
 package com.romantulchak.clouddisk.model;
 
+import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 
 import javax.persistence.*;
@@ -48,6 +49,8 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
 
     @OneToOne(mappedBy = "element", orphanRemoval = true)
     private PreRemove preRemove;
+
+    private boolean noticed;
 
     public long getId() {
         return id;
@@ -163,6 +166,15 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
 
     public StoreAbstract setPreRemove(PreRemove preRemove) {
         this.preRemove = preRemove;
+        return this;
+    }
+
+    public boolean isNoticed() {
+        return noticed;
+    }
+
+    public StoreAbstract setNoticed(boolean noticed) {
+        this.noticed = noticed;
         return this;
     }
 

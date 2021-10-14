@@ -40,6 +40,10 @@ public class StoreAbstractDTO {
     @MapToDTO(mapClass = {View.FolderFileView.class})
     private LocalPathDTO path;
 
+    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class})
+    private boolean noticed;
+
     public long getId() {
         return id;
     }
@@ -94,5 +98,13 @@ public class StoreAbstractDTO {
 
     public void setPath(LocalPathDTO path) {
         this.path = path;
+    }
+
+    public boolean isNoticed() {
+        return noticed;
+    }
+
+    public void setNoticed(boolean noticed) {
+        this.noticed = noticed;
     }
 }

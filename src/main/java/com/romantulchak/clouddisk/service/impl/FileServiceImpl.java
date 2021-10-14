@@ -70,6 +70,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<FileDTO> findFilesInDrive(String driveName) {
         return fileRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED).stream()
+                .sorted()
                 .map(file -> convertToDTO(file, View.FolderFileView.class))
                 .collect(Collectors.toList());
     }
@@ -92,7 +93,6 @@ public class FileServiceImpl implements FileService {
                 .setName(multipartFile.getOriginalFilename())
                 .setCreateAt(LocalDateTime.now())
                 .setUploadAt(LocalDateTime.now())
-                .setExtension(FileUtils.getFileExtension(multipartFile.getOriginalFilename()))
                 .setLink(UUID.randomUUID())
                 .setOwner(new User(userDetails.getId(), userDetails.getFirstName(), userDetails.getLastName()))
                 .setSize(multipartFile.getSize())
@@ -115,7 +115,6 @@ public class FileServiceImpl implements FileService {
                 .setName(multipartFile.getOriginalFilename())
                 .setCreateAt(LocalDateTime.now())
                 .setUploadAt(LocalDateTime.now())
-                .setExtension(FileUtils.getFileExtension(multipartFile.getOriginalFilename()))
                 .setLink(UUID.randomUUID())
                 .setOwner(new User(userDetails.getId(), userDetails.getFirstName(), userDetails.getLastName()))
                 .setSize(multipartFile.getSize())

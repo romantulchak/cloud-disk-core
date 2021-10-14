@@ -39,6 +39,7 @@ public class FolderController {
     public List<Store> findAllFoldersForDrive(@PathVariable("driveName") String driveName){
         return folderService.findAllFoldersForDrive(driveName);
     }
+
     @PostMapping("/create-subfolder/{mainFolderLink}")
     @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
     @JsonView(View.FolderView.class)

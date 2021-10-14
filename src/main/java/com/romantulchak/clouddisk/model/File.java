@@ -17,8 +17,6 @@ public class File extends StoreAbstract{
     @ManyToOne(fetch = FetchType.LAZY)
     private Folder folder;
 
-    private String extension;
-
     public long getSize() {
         return size;
     }
@@ -34,15 +32,6 @@ public class File extends StoreAbstract{
 
     public File setFolder(Folder folder) {
         this.folder = folder;
-        return this;
-    }
-
-    public String getExtension() {
-        return extension;
-    }
-
-    public File setExtension(String extension) {
-        this.extension = extension;
         return this;
     }
 

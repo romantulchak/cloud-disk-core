@@ -8,6 +8,7 @@ import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.repository.StoreRepository;
 import com.romantulchak.clouddisk.service.SearchService;
+import com.romantulchak.clouddisk.utils.StoreUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +38,7 @@ public class SearchServiceImpl implements SearchService {
 
     private StoreAbstractDTO convertToDTO(StoreAbstract entity, Class<?> classToCheck) {
         StoreAbstractDTO store = entityMapperInvoker.entityToDTO(entity, StoreAbstractDTO.class, classToCheck);
-        ContextType context;
-        if(entity.getClass().isAssignableFrom(File.class)){
-            context = ContextType.FILE;
-        }else{
-            context = ContextType.FOLDER;
-        }
-        store.setContext(context);
+        StoreUtils.setContext(entity, store);
         return store;
     }
 }
