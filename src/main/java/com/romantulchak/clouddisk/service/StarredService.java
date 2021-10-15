@@ -6,11 +6,11 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.UUID;
 
-public interface NoticeService {
+public interface StarredService {
 
     List<Store> findNoticedElements(Authentication authentication);
 
-    void addElementToNoticed(UUID link);
+    void addElementToNoticed(UUID link, Authentication authentication);
 
-    void removeFromNoticed(UUID link);
+    void removeFromNoticed(UUID link, Authentication authentication);
 }

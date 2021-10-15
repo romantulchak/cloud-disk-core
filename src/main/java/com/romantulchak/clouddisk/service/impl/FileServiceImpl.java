@@ -189,6 +189,8 @@ public class FileServiceImpl implements FileService {
     }
 
     private FileDTO convertToDTO(File file, Class<?> classToCheck) {
-        return entityMapperInvoker.entityToDTO(file, FileDTO.class, classToCheck);
+        FileDTO fileDTO = entityMapperInvoker.entityToDTO(file, FileDTO.class, classToCheck);
+        fileDTO.setNoticed(StoreUtils.isStarred(file));
+        return fileDTO;
     }
 }

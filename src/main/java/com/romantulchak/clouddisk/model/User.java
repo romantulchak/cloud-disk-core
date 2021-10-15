@@ -39,6 +39,9 @@ public class User {
     @OneToOne(mappedBy = "owner", orphanRemoval = true)
     private Drive drive;
 
+    @OneToMany(mappedBy = "user")
+    private List<Starred> starreds;
+
     public User(){}
 
     public User(long id, String firstName, String lastName){
@@ -59,8 +62,9 @@ public class User {
         return id;
     }
 
-    public void setId(long id) {
+    public User setId(long id) {
         this.id = id;
+        return this;
     }
 
     public String getFirstName() {
@@ -117,5 +121,13 @@ public class User {
 
     public void setDrive(Drive drive) {
         this.drive = drive;
+    }
+
+    public List<Starred> getStarreds() {
+        return starreds;
+    }
+
+    public void setStarreds(List<Starred> starreds) {
+        this.starreds = starreds;
     }
 }

@@ -12,36 +12,36 @@ import java.util.UUID;
 @DTO
 public class StoreAbstractDTO {
 
-    @MapToDTO(mapClass = {View.FolderFileView.class})
-    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
     private long id;
 
-    @MapToDTO(mapClass = {View.FolderFileView.class})
-    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
     private String name;
 
-    @MapToDTO(mapClass = {View.FolderFileView.class})
-    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
     private LocalDateTime createAt;
 
-    @MapToDTO(mapClass = {View.FolderFileView.class})
-    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
     private UUID link;
 
-    @MapToDTO(mapClass = {View.FolderFileView.class})
-    @JsonView(View.FolderFileView.class)
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
     private UserDTO owner;
 
-    @JsonView({View.FolderFileView.class,View.FolderView.class})
+    @JsonView({View.FolderFileView.class,View.FolderView.class, View.FolderView.class})
     @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
     private ContextType context;
 
-    @JsonView(View.FolderFileView.class)
-    @MapToDTO(mapClass = {View.FolderFileView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
     private LocalPathDTO path;
 
-    @JsonView(View.FolderFileView.class)
-    @MapToDTO(mapClass = {View.FolderFileView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
     private boolean noticed;
 
     public long getId() {
@@ -104,7 +104,8 @@ public class StoreAbstractDTO {
         return noticed;
     }
 
-    public void setNoticed(boolean noticed) {
+    public StoreAbstractDTO setNoticed(boolean noticed) {
         this.noticed = noticed;
+        return this;
     }
 }

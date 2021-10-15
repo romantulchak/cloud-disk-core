@@ -2,18 +2,21 @@ package com.romantulchak.clouddisk.utils;
 
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
-import com.romantulchak.clouddisk.model.File;
-import com.romantulchak.clouddisk.model.LocalPath;
-import com.romantulchak.clouddisk.model.StoreAbstract;
-import com.romantulchak.clouddisk.model.Trash;
+import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
+import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
 
 public class StoreUtils {
 
-    private StoreUtils(){}
+    private StoreUtils() {
+    }
 
-    public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash){
+    public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash) {
         LocalPath path = folderUtils.moveFileToTrash(element.getPath().getShortPath(), trash.getPath(), element.getName());
         LocalPath newPath = new LocalPath()
                 .setOldFullPath(element.getPath().getFullPath())
@@ -26,13 +29,25 @@ public class StoreUtils {
         return path;
     }
 
-    public static void setContext(StoreAbstract store, StoreAbstractDTO storeDTO){
+    public static void setContext(StoreAbstract store, StoreAbstractDTO storeDTO) {
         ContextType context;
-        if(store.getClass().isAssignableFrom(File.class)){
+        if (store.getClass().isAssignableFrom(File.class)) {
             context = ContextType.FILE;
-        }else{
+        } else {
             context = ContextType.FOLDER;
         }
         storeDTO.setContext(context);
+    }
+
+    public static boolean isStarred(StoreAbstract element) {
+        if (element.getStarreds() != null && !element.getStarreds().isEmpty()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            return element.getStarreds().stream()
+                    .anyMatch(starred -> starred.getElement().getId() == element.getId()
+                            && starred.getUser().getId() == userDetails.getId());
+
+        }
+        return false;
     }
 }

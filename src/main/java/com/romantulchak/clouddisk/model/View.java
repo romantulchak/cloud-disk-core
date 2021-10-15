@@ -5,4 +5,5 @@ public class View {
     public interface FolderView{ }
     public interface FileView { }
     public interface FolderFileView { }
+    public interface ElementAccessView { }
 }

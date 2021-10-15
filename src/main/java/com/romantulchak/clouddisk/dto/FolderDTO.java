@@ -31,4 +31,10 @@ public class FolderDTO extends StoreAbstractDTO implements Store {
     public void setColor(String color) {
         this.color = color;
     }
+
+    @Override
+    public FolderDTO setNoticed(boolean noticed) {
+        super.setNoticed(noticed);
+        return this;
+    }
 }

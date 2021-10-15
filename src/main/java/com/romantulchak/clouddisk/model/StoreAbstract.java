@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,7 +51,11 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
     @OneToOne(mappedBy = "element", orphanRemoval = true)
     private PreRemove preRemove;
 
-    private boolean noticed;
+    @OneToMany(mappedBy = "element", fetch = FetchType.EAGER)
+    private List<Starred> starreds;
+
+    @OneToOne(mappedBy = "element")
+    private ElementAccess access;
 
     public long getId() {
         return id;
@@ -169,12 +174,21 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
         return this;
     }
 
-    public boolean isNoticed() {
-        return noticed;
+    public List<Starred> getStarreds() {
+        return starreds;
     }
 
-    public StoreAbstract setNoticed(boolean noticed) {
-        this.noticed = noticed;
+    public StoreAbstract setStarreds(List<Starred> starreds) {
+        this.starreds = starreds;
+        return this;
+    }
+
+    public ElementAccess getAccess() {
+        return access;
+    }
+
+    public StoreAbstract setAccess(ElementAccess access) {
+        this.access = access;
         return this;
     }
 
