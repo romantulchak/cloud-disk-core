@@ -19,6 +19,8 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     List<File> findAllByDriveNameAndRemoveType(String driveName, RemoveType removeType);
 
+    List<File> findAllByFolderLink(UUID link);
+
     Optional<File> findFileByLink(UUID link);
 
     boolean existsByOwnerIdAndLink(long id, UUID link);

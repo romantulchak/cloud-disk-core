@@ -12,4 +12,6 @@ public interface ElementAccessRepository extends JpaRepository<ElementAccess, Lo
 
     Optional<ElementAccess> findByElementLink(UUID link);
 
+    Optional<ElementAccess> findByElementId(long id);
+
 }

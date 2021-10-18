@@ -44,6 +44,10 @@ public class StoreAbstractDTO {
     @JsonView({View.FolderFileView.class, View.FolderView.class})
     private boolean noticed;
 
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
+    private ElementAccessDTO access;
+
     public long getId() {
         return id;
     }
@@ -108,4 +112,13 @@ public class StoreAbstractDTO {
         this.noticed = noticed;
         return this;
     }
+
+    public ElementAccessDTO getAccess() {
+        return access;
+    }
+
+    public void setAccess(ElementAccessDTO access) {
+        this.access = access;
+    }
+
 }

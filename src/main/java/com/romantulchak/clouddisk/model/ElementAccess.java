@@ -60,7 +60,7 @@ public class ElementAccess {
         if (isAccessTypeExists){
             this.accessType = StoreAccessType.valueOf(accessType);
         }else{
-            this.accessType = StoreAccessType.COMMENTATOR;
+            this.accessType = StoreAccessType.READER;
         }
         return this;
     }

@@ -3,26 +3,20 @@ package com.romantulchak.clouddisk.dto;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mapperDTO.annotation.DTO;
 import com.mapperDTO.annotation.MapToDTO;
-import com.romantulchak.clouddisk.model.StoreAbstract;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.model.enums.StoreAccessType;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @DTO
 public class ElementAccessDTO {
 
-    @MapToDTO(mapClass = {View.ElementAccessView.class})
-    @JsonView(View.ElementAccessView.class)
     private long id;
 
-    @MapToDTO(mapClass = {View.ElementAccessView.class})
-    @JsonView(View.ElementAccessView.class)
     private LocalDateTime createAt;
 
-    @MapToDTO(mapClass = {View.ElementAccessView.class})
-    @JsonView(View.ElementAccessView.class)
+    @MapToDTO(mapClass = {View.ElementAccessView.class, View.FolderFileView.class})
+    @JsonView({View.ElementAccessView.class, View.FolderFileView.class})
     private StoreAccessType accessType;
 
     public long getId() {

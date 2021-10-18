@@ -2,6 +2,7 @@ package com.romantulchak.clouddisk.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.romantulchak.clouddisk.dto.FolderDTO;
+import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
 import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.service.FolderService;
@@ -41,7 +42,7 @@ public class FolderController {
     }
 
     @PostMapping("/create-subfolder/{mainFolderLink}")
-    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
+    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasEditAccess(#folderLink, authentication)")
     @JsonView(View.FolderView.class)
     public FolderDTO createSubFolder(@RequestBody String folderName,
                                      @PathVariable("mainFolderLink") UUID folderLink,
@@ -52,7 +53,7 @@ public class FolderController {
     @GetMapping("/sub-folders/{folderLink}")
     @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
     @JsonView(View.FolderFileView.class)
-    public List<Store> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
+    public List<StoreAbstractDTO> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
         return folderService.findSubFoldersInFolder(folderLink);
     }
 

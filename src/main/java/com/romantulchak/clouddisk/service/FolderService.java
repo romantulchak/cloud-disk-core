@@ -1,6 +1,7 @@
 package com.romantulchak.clouddisk.service;
 
 import com.romantulchak.clouddisk.dto.FolderDTO;
+import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
 import com.romantulchak.clouddisk.model.Folder;
 import com.romantulchak.clouddisk.model.Store;
 import org.springframework.core.io.Resource;
@@ -21,7 +22,7 @@ public interface FolderService {
 
     FolderDTO createSubFolder(String folderName, UUID folderLink, Authentication authentication);
 
-    List<Store> findSubFoldersInFolder(UUID folderLink);
+    List<StoreAbstractDTO> findSubFoldersInFolder(UUID folderLink);
 
     List<Store> findRemovedElements(String driveName);
 

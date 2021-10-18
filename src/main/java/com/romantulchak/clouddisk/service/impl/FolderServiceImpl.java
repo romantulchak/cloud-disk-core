@@ -3,6 +3,7 @@ package com.romantulchak.clouddisk.service.impl;
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
+import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.exception.TrashNotFoundException;
@@ -29,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,14 +131,14 @@ public class FolderServiceImpl implements FolderService {
 
     //TODO: fix
     @Override
-    public List<Store> findSubFoldersInFolder(UUID folderLink) {
+    public List<StoreAbstractDTO> findSubFoldersInFolder(UUID folderLink) {
         List<FolderDTO> subFolders = folderRepository.findSubFolders(folderLink, RemoveType.SAVED.name())
                 .stream()
                 .sorted()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
         List<FileDTO> filesInFolder = fileService.findFilesInFolder(folderLink);
-        List<Store> stores = new ArrayList<>();
+        List<StoreAbstractDTO> stores = new ArrayList<>();
         stores.addAll(subFolders);
         stores.addAll(filesInFolder);
         return stores;

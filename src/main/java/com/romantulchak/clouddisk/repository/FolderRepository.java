@@ -29,6 +29,9 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
 
     boolean existsByLinkAndOwnerId(UUID folderLink, long userId);
 
+    @EntityGraph(value = "Folder.subFolderFiles")
+    Folder findByLink(UUID link);
+
     @Transactional
     @Modifying
     void deleteFolderByLink(UUID folderLink);

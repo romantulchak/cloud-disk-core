@@ -10,6 +10,10 @@ import java.util.UUID;
 
 @Entity
 @DiscriminatorValue(value = "Folder")
+@NamedEntityGraph(name = "Folder.subFolderFiles",
+attributeNodes = {
+        @NamedAttributeNode("subFolders"),
+})
 public class Folder extends StoreAbstract{
 
     @OneToMany(orphanRemoval = true)
