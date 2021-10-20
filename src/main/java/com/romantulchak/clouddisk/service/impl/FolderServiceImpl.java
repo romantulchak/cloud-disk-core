@@ -207,9 +207,9 @@ public class FolderServiceImpl implements FolderService {
     }
 
     private FolderDTO convertToDTO(Folder folder, Class<?> classToCheck) {
-        FolderDTO folderDTO = entityMapperInvoker.entityToDTO(folder, FolderDTO.class, classToCheck);
-        folderDTO.setNoticed(StoreUtils.isStarred(folder));
-        return folderDTO;
+        return entityMapperInvoker.entityToDTO(folder, FolderDTO.class, classToCheck)
+                .setNoticed(StoreUtils.isStarred(folder))
+                .setOwner(StoreUtils.isOwner(folder));
     }
 
 }

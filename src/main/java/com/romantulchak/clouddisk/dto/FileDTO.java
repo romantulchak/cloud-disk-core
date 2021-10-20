@@ -21,4 +21,16 @@ public class FileDTO extends StoreAbstractDTO implements Store {
     public void setSize(String size) {
         this.size = size;
     }
+
+    @Override
+    public FileDTO setNoticed(boolean noticed) {
+        super.setNoticed(noticed);
+        return this;
+    }
+
+    @Override
+    public FileDTO setOwner(boolean owner) {
+        super.setOwner(owner);
+        return this;
+    }
 }

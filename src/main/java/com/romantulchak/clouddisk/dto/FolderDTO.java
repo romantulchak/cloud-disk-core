@@ -15,8 +15,8 @@ import java.util.UUID;
 @DTO
 public class FolderDTO extends StoreAbstractDTO implements Store {
 
-    @JsonView({View.FolderFileView.class,View.FolderView.class})
-    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
     private String color;
 
     @Override
@@ -37,4 +37,11 @@ public class FolderDTO extends StoreAbstractDTO implements Store {
         super.setNoticed(noticed);
         return this;
     }
+
+    @Override
+    public FolderDTO setOwner(boolean owner) {
+        super.setOwner(owner);
+        return this;
+    }
+
 }

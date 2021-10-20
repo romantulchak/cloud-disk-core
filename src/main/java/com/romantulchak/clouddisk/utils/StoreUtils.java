@@ -50,4 +50,15 @@ public class StoreUtils {
         }
         return false;
     }
+
+    public static boolean isOwner(StoreAbstract element){
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+        if (authentication == null){
+            return false;
+        }
+        UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
+        return element.getOwner().getId() == principal.getId();
+    }
 }

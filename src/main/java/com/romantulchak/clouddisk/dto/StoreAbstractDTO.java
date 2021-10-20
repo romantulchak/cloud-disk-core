@@ -48,6 +48,9 @@ public class StoreAbstractDTO {
     @JsonView({View.FolderFileView.class, View.FolderView.class})
     private ElementAccessDTO access;
 
+    @JsonView({View.FolderFileView.class, View.FolderView.class})
+    private boolean isOwner;
+
     public long getId() {
         return id;
     }
@@ -121,4 +124,12 @@ public class StoreAbstractDTO {
         this.access = access;
     }
 
+    public boolean isOwner() {
+        return isOwner;
+    }
+
+    public StoreAbstractDTO setOwner(boolean owner) {
+        isOwner = owner;
+        return this;
+    }
 }

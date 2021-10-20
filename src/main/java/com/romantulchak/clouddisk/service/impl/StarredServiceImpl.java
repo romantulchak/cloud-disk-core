@@ -93,16 +93,16 @@ public class StarredServiceImpl implements StarredService {
         return (UserDetailsImpl) authentication.getPrincipal();
     }
 
-    private FolderDTO convertToFolderDTO(Folder entity, Class<?> classToCheck) {
-        FolderDTO folderDTO = folderMapper.entityToDTO(entity, FolderDTO.class, classToCheck);
-        folderDTO.setNoticed(StoreUtils.isStarred(entity));
-        return folderDTO;
+    private FolderDTO convertToFolderDTO(Folder folder, Class<?> classToCheck) {
+        return folderMapper.entityToDTO(folder, FolderDTO.class, classToCheck)
+                .setNoticed(StoreUtils.isStarred(folder))
+                .setOwner(StoreUtils.isOwner(folder));
     }
 
-    private FileDTO convertToFileDTO(File entity, Class<?> classToCheck) {
-        FileDTO fileDTO = fileMapper.entityToDTO(entity, FileDTO.class, classToCheck);
-        fileDTO.setNoticed(StoreUtils.isStarred(entity));
-        return fileDTO;
+    private FileDTO convertToFileDTO(File file, Class<?> classToCheck) {
+        return fileMapper.entityToDTO(file, FileDTO.class, classToCheck)
+                .setNoticed(StoreUtils.isStarred(file))
+                .setOwner(StoreUtils.isOwner(file));
     }
 
 }
