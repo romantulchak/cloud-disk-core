@@ -1,5 +1,9 @@
 package com.romantulchak.clouddisk.utils;
 
+import com.romantulchak.clouddisk.exception.RemoveElementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,7 +13,14 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class ZipUtils {
+public final class ZipUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZipUtils.class);
+
+
+    private ZipUtils() {
+
+    }
 
     public static Path createZip(String elementName, String shortPath) throws IOException {
         String parentRootPath = FileUtils.getParentRootPath(shortPath);
@@ -30,11 +41,12 @@ public class ZipUtils {
         return path;
     }
 
-    public static void removeCreatedZip(Path path){
+    public static void removeCreatedZip(Path path) {
         try {
-            Files.delete(path);
+            Files.deleteIfExists(path);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
+            throw new RemoveElementException();
         }
     }
 

@@ -2,15 +2,11 @@ package com.romantulchak.clouddisk.service.impl;
 
 import com.romantulchak.clouddisk.exception.TrashNotFoundException;
 import com.romantulchak.clouddisk.model.Drive;
-import com.romantulchak.clouddisk.model.LocalPath;
-import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.Trash;
 import com.romantulchak.clouddisk.repository.TrashRepository;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class TrashServiceImpl implements TrashService {
@@ -39,13 +35,6 @@ public class TrashServiceImpl implements TrashService {
     public Trash getTrashByDriveName(String driveName) {
         return trashRepository.findTrashByDriveName(driveName)
                 .orElseThrow(() -> new TrashNotFoundException(driveName));
-    }
-
-    @Override
-    public List<Store> getRemovedElements(String driveName) {
-//        Trash trash = getTrashByDriveName(driveName);
-//        return folderService.findRemovedElementsByTrashId(trash.getId());
-        return null;
     }
 
 }

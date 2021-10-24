@@ -1,15 +1,15 @@
 package com.romantulchak.clouddisk.utils;
 
-import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
-import com.romantulchak.clouddisk.model.*;
+import com.romantulchak.clouddisk.model.File;
+import com.romantulchak.clouddisk.model.LocalPath;
+import com.romantulchak.clouddisk.model.StoreAbstract;
+import com.romantulchak.clouddisk.model.Trash;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.util.List;
 
 public class StoreUtils {
 
@@ -51,11 +51,11 @@ public class StoreUtils {
         return false;
     }
 
-    public static boolean isOwner(StoreAbstract element){
+    public static boolean isOwner(StoreAbstract element) {
         Authentication authentication = SecurityContextHolder
                 .getContext()
                 .getAuthentication();
-        if (authentication == null){
+        if (authentication == null) {
             return false;
         }
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();

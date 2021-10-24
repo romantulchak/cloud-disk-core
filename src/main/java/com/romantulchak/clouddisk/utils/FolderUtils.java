@@ -1,7 +1,13 @@
 package com.romantulchak.clouddisk.utils;
 
+import com.romantulchak.clouddisk.exception.CreateFolderException;
+import com.romantulchak.clouddisk.exception.FileAlreadyMovedException;
+import com.romantulchak.clouddisk.exception.FileWithNameAlreadyExistsException;
+import com.romantulchak.clouddisk.exception.RemoveElementException;
 import com.romantulchak.clouddisk.model.LocalPath;
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,9 +19,10 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 
-//TODO: work with exceptions
 @Component
 public class FolderUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FolderUtils.class);
 
     private final String drivePath;
 
@@ -31,17 +38,16 @@ public class FolderUtils {
     public LocalPath createDrive(String driveName) {
         try {
             String shorPath = String.join("/", drivePath, driveName);
-            File file = new File(drivePath);
-            if(!file.exists()){
-                file.mkdir();
-            }
             Path path = Paths.get(shorPath);
             Files.createDirectory(path);
             String fullPath = getFullPath(driveName);
             return new LocalPath(fullPath, shorPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("See logs");
+        }catch (FileAlreadyExistsException ex){
+            LOGGER.error(ex.getMessage());
+            throw new FileWithNameAlreadyExistsException(driveName);
+        }catch (IOException ex){
+            LOGGER.error(ex.getMessage());
+            throw new CreateFolderException();
         }
     }
 
@@ -53,9 +59,12 @@ public class FolderUtils {
             Files.createDirectory(path);
             String fullPath = getFullPath(getFileRelativePath(folderPath));
             return new LocalPath(fullPath, folderPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("See logs");
+        }catch (FileAlreadyExistsException ex){
+            LOGGER.error(ex.getMessage());
+            throw new FileWithNameAlreadyExistsException(folderName);
+        }catch (IOException ex){
+            LOGGER.error(ex.getMessage());
+            throw new CreateFolderException();
         }
     }
 
@@ -65,13 +74,15 @@ public class FolderUtils {
             Path path = Paths.get(trashPath);
             Files.createDirectory(path);
             return trashPath;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("see logs");
+        }catch (FileAlreadyExistsException ex){
+            LOGGER.error(ex.getMessage());
+            throw new FileWithNameAlreadyExistsException(trashName);
+        }catch (IOException ex){
+            LOGGER.error(ex.getMessage());
+            throw new CreateFolderException();
         }
     }
 
-    //TODO: fix FULL PATH without user folder
     public LocalPath uploadFile(MultipartFile multipartFile, String shortPath) {
         try {
             shortPath = String.join("/", shortPath, multipartFile.getOriginalFilename());
@@ -79,28 +90,25 @@ public class FolderUtils {
             String fullPath = getFullPath(getFileRelativePath(shortPath));
             multipartFile.transferTo(path);
             return new LocalPath(fullPath, shortPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("See logs");
+        }catch (IllegalStateException | IOException e){
+            LOGGER.error(e.getMessage());
+            throw new FileAlreadyMovedException();
         }
     }
 
-    private String getFullPath(String fileRelativePath) {
-        return String.join("/", host, FOLDER_KEY, fileRelativePath);
-    }
 
     public boolean removeElement(String folderPath) {
         Path path = Paths.get(folderPath);
         try (Stream<Path> walk = Files.walk(path)) {
             walk.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
-                    .forEach(File::delete);
-            return true;
+                    .forEach(File::deleteOnExit);
+            throw new NoSuchFileException(folderPath);
         } catch (NoSuchFileException ex) {
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("See logs");
+            LOGGER.error(e.getMessage());
+            throw new RemoveElementException();
         }
     }
 
@@ -111,9 +119,9 @@ public class FolderUtils {
             Path shortFilePath = Paths.get(filePath);
             Files.move(shortFilePath, shortTrashPath, StandardCopyOption.REPLACE_EXISTING);
             return new LocalPath(getFullPath(getFileRelativePath(localPath)), localPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("See logs");
+        }catch (IllegalStateException | IOException e){
+            LOGGER.error(e.getMessage());
+            throw new FileAlreadyMovedException();
         }
     }
 
@@ -123,9 +131,9 @@ public class FolderUtils {
             Path newShortPath = Paths.get(newPath);
             Files.move(oldShortPath, newShortPath);
             return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("See logs");
+        }catch (IllegalStateException | IOException e){
+            LOGGER.error(e.getMessage());
+            throw new FileAlreadyMovedException();
         }
     }
 
@@ -136,6 +144,10 @@ public class FolderUtils {
             return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
         }
         return path.replace("home\\/cloud-disk-files\\/", "");
+    }
+
+    private String getFullPath(String fileRelativePath) {
+        return String.join("/", host, FOLDER_KEY, fileRelativePath);
     }
 
 }
