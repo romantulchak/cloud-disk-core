@@ -21,17 +21,22 @@ public class ElementAccessController {
         this.elementAccessService = elementAccessService;
     }
 
-    @GetMapping("/{link}/{type}")
+    @GetMapping("/{link}")
     @JsonView(View.ElementAccessView.class)
-    public ElementAccessDTO findElementAccess(@PathVariable("link") UUID link,
-                                              @PathVariable("type") String type) {
-        return elementAccessService.findElementAccess(link, type);
+    public ElementAccessDTO findElementAccess(@PathVariable("link") UUID link) {
+        return elementAccessService.findElementAccess(link);
+    }
+
+    @PutMapping("/open/{link}")
+    @JsonView(View.ElementAccessView.class)
+    public ElementAccessDTO openAccess(@RequestBody String type, @PathVariable("link") UUID link){
+        return elementAccessService.openAccess(link, type);
     }
 
     @PutMapping("/change/{link}")
-    public void changeAccessType(@PathVariable("link") UUID link,
+    public ElementAccessDTO changeAccessType(@PathVariable("link") UUID link,
                                  @RequestBody String type) {
-        elementAccessService.changeAccess(link, type);
+       return elementAccessService.changeAccess(link, type);
     }
 
     @GetMapping("/types")

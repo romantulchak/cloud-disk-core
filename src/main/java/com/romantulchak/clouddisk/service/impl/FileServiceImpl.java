@@ -5,15 +5,13 @@ import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.exception.*;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
-import com.romantulchak.clouddisk.repository.DriveRepository;
-import com.romantulchak.clouddisk.repository.FileRepository;
-import com.romantulchak.clouddisk.repository.FolderRepository;
-import com.romantulchak.clouddisk.repository.PreRemoveRepository;
+import com.romantulchak.clouddisk.repository.*;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -40,14 +38,17 @@ public class FileServiceImpl implements FileService {
     private final DriveRepository driveRepository;
     private final TrashService trashService;
     private final PreRemoveRepository removeRepository;
+    private final ElementAccessRepository elementAccessRepository;
     private final EntityMapperInvoker<File, FileDTO> entityMapperInvoker;
 
+    @Autowired
     public FileServiceImpl(FileRepository fileRepository,
                            FolderRepository folderRepository,
                            FolderUtils folderUtils,
                            TrashService trashService,
                            DriveRepository driveRepository,
                            PreRemoveRepository removeRepository,
+                           ElementAccessRepository elementAccessRepository,
                            EntityMapperInvoker<File, FileDTO> entityMapperInvoker) {
         this.fileRepository = fileRepository;
         this.folderRepository = folderRepository;
@@ -55,6 +56,7 @@ public class FileServiceImpl implements FileService {
         this.driveRepository = driveRepository;
         this.trashService = trashService;
         this.removeRepository = removeRepository;
+        this.elementAccessRepository = elementAccessRepository;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
@@ -98,7 +100,14 @@ public class FileServiceImpl implements FileService {
                 .setSize(multipartFile.getSize())
                 .setPath(path)
                 .setFolder(folder);
-        fileRepository.save(file);
+        file = fileRepository.save(file);
+        if (folder.getAccess() != null){
+            ElementAccess elementAccess = new ElementAccess()
+                    .setElement(file)
+                    .setAccessType(folder.getAccess().getAccessType().name());
+            elementAccessRepository.save(elementAccess);
+            file.setAccess(elementAccess);
+        }
         return CompletableFuture.completedFuture(convertToDTO(file, View.FolderFileView.class));
     }
 

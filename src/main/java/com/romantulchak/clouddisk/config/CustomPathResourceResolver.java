@@ -6,12 +6,12 @@ import org.springframework.web.servlet.resource.ResourceResolver;
 
 import java.io.IOException;
 
-
+//TODO: fix bug related to cyrillic filename
 public class CustomPathResourceResolver extends PathResourceResolver implements ResourceResolver {
 
     @Override
     protected Resource getResource(String resourcePath, Resource location) throws IOException {
-        resourcePath = resourcePath.replace("%2520","%20");
+        resourcePath = resourcePath.replace(" ","%20");
         return super.getResource(resourcePath, location);
     }
 }

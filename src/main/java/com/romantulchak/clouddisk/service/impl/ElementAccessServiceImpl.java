@@ -41,15 +41,15 @@ public class ElementAccessServiceImpl implements ElementAccessService {
 
     @Transactional
     @Override
-    public ElementAccessDTO findElementAccess(UUID link, String type) {
+    public ElementAccessDTO findElementAccess(UUID link) {
         Optional<ElementAccess> optionalElementAccess = elementAccessRepository.findByElementLink(link);
-        if (optionalElementAccess.isPresent()) {
-            return convertToDTO(optionalElementAccess.get(), View.ElementAccessView.class);
-        }
-        return openAccessByLink(link, type);
+        return optionalElementAccess.
+                map(elementAccess -> convertToDTO(elementAccess, View.ElementAccessView.class))
+                .orElse(null);
     }
 
-    private ElementAccessDTO openAccessByLink(UUID link, String type) {
+    @Override
+    public ElementAccessDTO openAccess(UUID link, String type) {
         StoreAbstract element = storeRepository.findByLink(link)
                 .orElseThrow(() -> new ElementNotFoundException(link));
         ElementAccess elementAccess = new ElementAccess()
@@ -69,17 +69,19 @@ public class ElementAccessServiceImpl implements ElementAccessService {
     }
 
     @Override
-    public void changeAccess(UUID link, String type) {
+    public ElementAccessDTO changeAccess(UUID link, String type) {
         StoreAbstract element = storeRepository.findByLink(link)
                 .orElseThrow(() -> new ElementNotFoundException(link));
+        ElementAccessDTO elementAccess = convertToDTO(element.getAccess(), View.ElementAccessView.class);
         if (element.getAccess() != null) {
             updateAccess(element, type);
             if (element instanceof Folder) {
                 setAccessToSubElements((Folder) element, type);
             }
         } else {
-            openAccessByLink(link, type);
+            elementAccess = openAccess(link, type);
         }
+        return elementAccess;
     }
 
     private void setAccessToSubElements(Folder subFolder, String type) {

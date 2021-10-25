@@ -8,9 +8,11 @@ import java.util.UUID;
 
 public interface ElementAccessService {
 
-    ElementAccessDTO findElementAccess(UUID uuid, String accessType);
+    ElementAccessDTO findElementAccess(UUID uuid);
 
     List<StoreAccessDTO> getAccessTypes();
 
-    void changeAccess(UUID link, String type);
+    ElementAccessDTO openAccess(UUID link, String type);
+
+    ElementAccessDTO changeAccess(UUID link, String type);
 }

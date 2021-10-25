@@ -1,24 +1,29 @@
 package com.romantulchak.clouddisk.dto;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.mapperDTO.annotation.DTO;
+import com.mapperDTO.annotation.MapToDTO;
 import com.romantulchak.clouddisk.model.Store;
+import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 
 @DTO
 public class FileDTO extends StoreAbstractDTO implements Store {
 
-    private String size;
+    @MapToDTO(mapClass = {View.FolderFileView.class})
+    @JsonView(View.FolderFileView.class)
+    private long size;
 
     @Override
     public ContextType getContext() {
         return ContextType.FILE;
     }
 
-    public String getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(long size) {
         this.size = size;
     }
 

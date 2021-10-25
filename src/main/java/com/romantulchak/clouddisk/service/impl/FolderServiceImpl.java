@@ -9,13 +9,9 @@ import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.exception.TrashNotFoundException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
-import com.romantulchak.clouddisk.repository.DriveRepository;
-import com.romantulchak.clouddisk.repository.FolderRepository;
-import com.romantulchak.clouddisk.repository.PreRemoveRepository;
-import com.romantulchak.clouddisk.repository.TrashRepository;
+import com.romantulchak.clouddisk.repository.*;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
-import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
@@ -45,6 +41,7 @@ public class FolderServiceImpl implements FolderService {
     private final FolderUtils folderUtils;
     private final TrashRepository trashRepository;
     private final PreRemoveRepository removeRepository;
+    private final ElementAccessRepository elementAccessRepository;
     private final EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker;
 
 
@@ -55,7 +52,7 @@ public class FolderServiceImpl implements FolderService {
                              FolderUtils folderUtils,
                              TrashRepository trashRepository,
                              PreRemoveRepository removeRepository,
-                             TrashService trashService,
+                             ElementAccessRepository elementAccessRepository,
                              EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker) {
         this.folderRepository = folderRepository;
         this.driveRepository = driveRepository;
@@ -64,6 +61,7 @@ public class FolderServiceImpl implements FolderService {
         this.trashRepository = trashRepository;
         this.removeRepository = removeRepository;
         this.entityMapperInvoker = entityMapperInvoker;
+        this.elementAccessRepository = elementAccessRepository;
     }
 
     //TODO: add check if folder named doesn't exist
@@ -124,12 +122,18 @@ public class FolderServiceImpl implements FolderService {
         Folder mainFolder = folderRepository.findFolderByLink(folderLink)
                 .orElseThrow(() -> new FolderNotFoundException(folderLink));
         Folder subFolder = getSubFolder(folderName, authentication, mainFolder.getPath().getShortPath());
-        folderRepository.save(subFolder);
+        subFolder = folderRepository.save(subFolder);
+        if (mainFolder.getAccess() != null){
+            ElementAccess elementAccess = new ElementAccess()
+                    .setElement(subFolder)
+                    .setAccessType(mainFolder.getAccess().getAccessType().name());
+            subFolder.setAccess(elementAccess);
+            elementAccessRepository.save(elementAccess);
+        }
         mainFolder.getSubFolders().add(subFolder);
         return convertToDTO(subFolder, View.FolderView.class);
     }
 
-    //TODO: fix
     @Override
     public List<StoreAbstractDTO> findSubFoldersInFolder(UUID folderLink) {
         List<FolderDTO> subFolders = folderRepository.findSubFolders(folderLink, RemoveType.SAVED.name())
