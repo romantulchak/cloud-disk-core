@@ -1,7 +1,6 @@
 package com.romantulchak.clouddisk.schedule;
 
 import com.romantulchak.clouddisk.model.File;
-import com.romantulchak.clouddisk.model.Folder;
 import com.romantulchak.clouddisk.model.PreRemove;
 import com.romantulchak.clouddisk.model.StoreAbstract;
 import com.romantulchak.clouddisk.repository.FileRepository;
@@ -38,7 +37,7 @@ public class TrashCleaner {
 
     @Transactional
     @Async
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 0 6 * * *")
     public void trashClean() {
         List<PreRemove> all = removeRepository.findAllByRemoveDate(LocalDate.now());
         for (PreRemove preRemove : all) {
@@ -47,6 +46,7 @@ public class TrashCleaner {
     }
 
     private void removeElement(StoreAbstract element){
+        removeRepository.deleteByElementId(element.getId());
         folderUtils.removeElement(element.getRemove().getPath());
         if (element instanceof File){
             fileRepository.deleteById(element.getId());

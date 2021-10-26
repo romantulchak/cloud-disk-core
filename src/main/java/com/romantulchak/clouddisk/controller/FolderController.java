@@ -63,12 +63,6 @@ public class FolderController {
         folderService.removeFolder(folderLink);
     }
 
-    @PutMapping("/pre-remove/{folderLink}")
-    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
-    public void preRemoveFolder(@PathVariable("folderLink") UUID folderLink, @RequestBody String driveName){
-        folderService.preRemoveFolder(folderLink, driveName);
-    }
-
     @GetMapping("/download-folder/{folderLink}")
     @ResponseBody
     public ResponseEntity<Resource> downloadFolder(@PathVariable("folderLink") UUID folderLink) throws IOException {

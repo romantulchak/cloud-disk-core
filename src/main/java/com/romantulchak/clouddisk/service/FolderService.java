@@ -32,8 +32,6 @@ public interface FolderService {
 
     ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException;
 
-    void preRemoveFolder(UUID folderLink, String driveName);
-
     FolderDTO changeColor(UUID folderLink, String color);
 
 }

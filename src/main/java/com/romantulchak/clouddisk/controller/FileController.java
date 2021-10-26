@@ -52,10 +52,4 @@ public class FileController {
         return fileService.downloadFile(link);
     }
 
-    @PutMapping("/pre-delete-file/{fileLink}")
-    @PreAuthorize("hasRole('USER') AND @userFileAccess.hasAccess(#fileLink, authentication)")
-    public void preDeleteFile(@PathVariable("fileLink") UUID fileLink, @RequestBody String driveName){
-        fileService.preDeleteFile(fileLink, driveName);
-    }
-
 }

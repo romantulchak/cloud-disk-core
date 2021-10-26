@@ -2,7 +2,10 @@ package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.FileDTO;
-import com.romantulchak.clouddisk.exception.*;
+import com.romantulchak.clouddisk.exception.DriveNotFoundException;
+import com.romantulchak.clouddisk.exception.FileNotFoundException;
+import com.romantulchak.clouddisk.exception.FileWithNameAlreadyExistsException;
+import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.*;
@@ -36,7 +39,6 @@ public class FileServiceImpl implements FileService {
     private final FolderRepository folderRepository;
     private final FolderUtils folderUtils;
     private final DriveRepository driveRepository;
-    private final TrashService trashService;
     private final PreRemoveRepository removeRepository;
     private final ElementAccessRepository elementAccessRepository;
     private final EntityMapperInvoker<File, FileDTO> entityMapperInvoker;
@@ -45,7 +47,6 @@ public class FileServiceImpl implements FileService {
     public FileServiceImpl(FileRepository fileRepository,
                            FolderRepository folderRepository,
                            FolderUtils folderUtils,
-                           TrashService trashService,
                            DriveRepository driveRepository,
                            PreRemoveRepository removeRepository,
                            ElementAccessRepository elementAccessRepository,
@@ -54,7 +55,6 @@ public class FileServiceImpl implements FileService {
         this.folderRepository = folderRepository;
         this.folderUtils = folderUtils;
         this.driveRepository = driveRepository;
-        this.trashService = trashService;
         this.removeRepository = removeRepository;
         this.elementAccessRepository = elementAccessRepository;
         this.entityMapperInvoker = entityMapperInvoker;
@@ -138,27 +138,9 @@ public class FileServiceImpl implements FileService {
         File file = fileRepository.findFileByLink(fileLink).orElseThrow(() -> new FileNotFoundException(fileLink));
         boolean isDeleted = folderUtils.removeElement(file.getPath().getShortPath());
         if (isDeleted) {
+            removeRepository.deleteByElementId(file.getId());
             fileRepository.delete(file);
         }
-    }
-    @Transactional
-    @Override
-    public void preDeleteFile(UUID fileLink, String driveName) {
-        File file = fileRepository.findFileByLink(fileLink)
-                .orElseThrow(() -> new FileNotFoundException(fileLink));
-        if (file.getRemoveType() != RemoveType.PRE_REMOVED) {
-            Trash trash = trashService.getTrashByDriveName(driveName);
-            LocalPath path = StoreUtils.preRemoveElement(file, folderUtils, trash);
-            fileRepository.save(file);
-            createPreRemove(file, path.getShortPath());
-        } else {
-            throw new ObjectAlreadyPreRemovedException(file.getName());
-        }
-    }
-
-    private void createPreRemove(File file, String pathInTrash) {
-        PreRemove remove = new PreRemove(file, pathInTrash);
-        removeRepository.save(remove);
     }
 
     @Override

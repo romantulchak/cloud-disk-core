@@ -25,7 +25,5 @@ public interface FileService {
 
     void deleteFile(UUID fileLink);
 
-    void preDeleteFile(UUID fileLink, String driveName);
-
     ResponseEntity<Resource> downloadFile(UUID link) throws IOException;
 }

@@ -15,8 +15,6 @@ public class LocalPath {
         this.shortPath = shortPath;
     }
 
-
-
     public LocalPath() {
 
     }

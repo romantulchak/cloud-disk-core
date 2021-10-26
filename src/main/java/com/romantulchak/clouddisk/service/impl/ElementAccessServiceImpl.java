@@ -3,7 +3,6 @@ package com.romantulchak.clouddisk.service.impl;
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.ElementAccessDTO;
 import com.romantulchak.clouddisk.dto.StoreAccessDTO;
-import com.romantulchak.clouddisk.exception.ElementAccessAlreadyExistsException;
 import com.romantulchak.clouddisk.exception.ElementNotFoundException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.StoreAccessType;
@@ -15,7 +14,6 @@ import com.romantulchak.clouddisk.service.ElementAccessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,6 +70,7 @@ public class ElementAccessServiceImpl implements ElementAccessService {
         return StoreAccessType.getAccessTypes();
     }
 
+    @Transactional
     @Override
     public ElementAccessDTO changeAccess(UUID link, String type) {
         StoreAbstract element = storeRepository.findByLink(link)
@@ -145,7 +144,9 @@ public class ElementAccessServiceImpl implements ElementAccessService {
     }
 
     private void openAccessToElement(StoreAbstract element) {
-        storeRepository.updateLinkAccess(true, element.getId());
+        if (!element.isHasLinkAccess()){
+            storeRepository.updateLinkAccess(true, element.getId());
+        }
     }
 
     private ElementAccessDTO convertToDTO(ElementAccess elementAccess, Class<?> classToCheck) {

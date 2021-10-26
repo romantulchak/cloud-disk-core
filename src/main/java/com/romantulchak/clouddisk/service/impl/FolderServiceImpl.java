@@ -173,6 +173,7 @@ public class FolderServiceImpl implements FolderService {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
         boolean isDeleted = folderUtils.removeElement(folder.getPath().getShortPath());
         if (isDeleted) {
+            removeRepository.deleteByElementId(folder.getId());
             folderRepository.deleteFolderByLink(folderLink);
         }
     }
@@ -183,21 +184,6 @@ public class FolderServiceImpl implements FolderService {
                 .orElseThrow(() -> new FolderNotFoundException(folderLink));
         Path path = ZipUtils.createZip(folder.getName(), folder.getPath().getShortPath());
         return FileUtils.getResource(path, folder.getPath().getShortPath());
-    }
-
-    @Transactional
-    @Override
-    public void preRemoveFolder(UUID folderLink, String driveName) {
-        Folder folder = findFolderByLink(folderLink);
-        if(folder.getRemoveType() != RemoveType.PRE_REMOVED){
-            Trash trash = trashRepository.findTrashByDriveName(driveName)
-                    .orElseThrow(() -> new TrashNotFoundException(driveName));
-            LocalPath path = StoreUtils.preRemoveElement(folder, folderUtils, trash);
-            folder = folderRepository.save(folder);
-            PreRemove preRemove = new PreRemove(folder, path.getShortPath());
-            removeRepository.save(preRemove);
-
-        }
     }
 
     @Override

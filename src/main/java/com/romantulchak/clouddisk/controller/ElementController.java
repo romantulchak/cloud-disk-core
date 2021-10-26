@@ -25,4 +25,11 @@ public class ElementController {
         elementService.restoreElement(link);
     }
 
+
+    @PutMapping("/pre-remove/{link}")
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#link, authentication)")
+    public void preRemoveElement(@PathVariable("link") UUID link, @RequestBody String driveName){
+        elementService.preRemoveElement(link, driveName);
+    }
+
 }
