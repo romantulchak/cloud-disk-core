@@ -2,6 +2,7 @@ package com.romantulchak.clouddisk.repository;
 
 import com.romantulchak.clouddisk.model.ElementAccess;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -14,4 +15,6 @@ public interface ElementAccessRepository extends JpaRepository<ElementAccess, Lo
 
     Optional<ElementAccess> findByElementId(long id);
 
+    @Modifying
+    void deleteByElementId(long id);
 }

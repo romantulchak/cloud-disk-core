@@ -31,6 +31,11 @@ public class UserElementAccess {
         return checkAccess(link, authentication, StoreAccessType.EDITOR);
     }
 
+    public boolean hasFullAccess(UUID link, Authentication authentication){
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return storeRepository.existsByLinkAndOwnerId(link, userDetails.getId());
+    }
+
     private boolean checkAccess(UUID link, Authentication authentication, StoreAccessType type) {
         StoreAbstract element = storeRepository.findByLink(link)
                 .orElseThrow(() -> new ElementNotFoundException(link));

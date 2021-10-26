@@ -5,6 +5,8 @@ import com.romantulchak.clouddisk.dto.ElementAccessDTO;
 import com.romantulchak.clouddisk.dto.StoreAccessDTO;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.service.ElementAccessService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +31,15 @@ public class ElementAccessController {
 
     @PutMapping("/open/{link}")
     @JsonView(View.ElementAccessView.class)
+    @PreAuthorize("@userElementAccess.hasFullAccess(#link, authentication) OR @userElementAccess.hasEditAccess(#link, authentication)")
     public ElementAccessDTO openAccess(@RequestBody String type, @PathVariable("link") UUID link){
         return elementAccessService.openAccess(link, type);
+    }
+
+    @PutMapping("/close/{link}")
+    @PreAuthorize("@userElementAccess.hasFullAccess(#link, authentication) OR @userElementAccess.hasEditAccess(#link, authentication)")
+    public void closeAccess(@PathVariable("link") UUID link){
+        elementAccessService.closeAccess(link);
     }
 
     @PutMapping("/change/{link}")

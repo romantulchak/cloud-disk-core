@@ -3,6 +3,7 @@ package com.romantulchak.clouddisk.service.impl;
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.ElementAccessDTO;
 import com.romantulchak.clouddisk.dto.StoreAccessDTO;
+import com.romantulchak.clouddisk.exception.ElementAccessAlreadyExistsException;
 import com.romantulchak.clouddisk.exception.ElementNotFoundException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.StoreAccessType;
@@ -14,6 +15,7 @@ import com.romantulchak.clouddisk.service.ElementAccessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,6 +50,7 @@ public class ElementAccessServiceImpl implements ElementAccessService {
                 .orElse(null);
     }
 
+    @Transactional
     @Override
     public ElementAccessDTO openAccess(UUID link, String type) {
         StoreAbstract element = storeRepository.findByLink(link)
@@ -62,6 +65,7 @@ public class ElementAccessServiceImpl implements ElementAccessService {
         openAccessToElement(element);
         return convertToDTO(elementAccess, View.ElementAccessView.class);
     }
+
 
     @Override
     public List<StoreAccessDTO> getAccessTypes() {
@@ -84,8 +88,36 @@ public class ElementAccessServiceImpl implements ElementAccessService {
         return elementAccess;
     }
 
+    @Transactional
+    @Override
+    public void closeAccess(UUID link) {
+        StoreAbstract storeAbstract = storeRepository.findByLink(link)
+                .orElseThrow(() -> new ElementNotFoundException(link));
+        storeAbstract.setHasLinkAccess(false);
+        elementAccessRepository.deleteByElementId(storeAbstract.getId());
+        if (storeAbstract instanceof Folder) {
+            closeAccessForSubElements(link);
+        }
+
+    }
+
+    private void closeAccessForSubElements(UUID link) {
+        List<Folder> subFolders = folderRepository.findByLink(link).getSubFolders();
+        List<File> files = fileRepository.findAllByFolderLink(link);
+        for (File file : files) {
+            elementAccessRepository.deleteByElementId(file.getId());
+            storeRepository.updateLinkAccess(false, file.getId());
+        }
+        for (Folder folder : subFolders) {
+            elementAccessRepository.deleteByElementId(folder.getId());
+            storeRepository.updateLinkAccess(false, folder.getId());
+            closeAccessForSubElements(folder.getLink());
+        }
+    }
+
     private void setAccessToSubElements(Folder subFolder, String type) {
-        List<Folder> subFolders = folderRepository.findByLink(subFolder.getLink()).getSubFolders();
+        List<Folder> subFolders = folderRepository.findByLink(subFolder.getLink())
+                .getSubFolders();
         List<File> files = fileRepository.findAllByFolderLink(subFolder.getLink());
         for (File file : files) {
             openAccessToElement(file);
@@ -101,7 +133,7 @@ public class ElementAccessServiceImpl implements ElementAccessService {
     private void updateAccess(StoreAbstract element, String type) {
         Optional<ElementAccess> optionalElementAccess = elementAccessRepository.findByElementId(element.getId());
         ElementAccess elementAccess;
-        if(optionalElementAccess.isPresent()){
+        if (optionalElementAccess.isPresent()) {
             elementAccess = optionalElementAccess.get();
             elementAccess.setAccessType(type);
         } else {
@@ -113,8 +145,7 @@ public class ElementAccessServiceImpl implements ElementAccessService {
     }
 
     private void openAccessToElement(StoreAbstract element) {
-        element.setHasLinkAccess(true);
-        storeRepository.save(element);
+        storeRepository.updateLinkAccess(true, element.getId());
     }
 
     private ElementAccessDTO convertToDTO(ElementAccess elementAccess, Class<?> classToCheck) {

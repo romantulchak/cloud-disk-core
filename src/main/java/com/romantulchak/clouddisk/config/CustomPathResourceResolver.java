@@ -11,7 +11,7 @@ public class CustomPathResourceResolver extends PathResourceResolver implements 
 
     @Override
     protected Resource getResource(String resourcePath, Resource location) throws IOException {
-        resourcePath = resourcePath.replace(" ","%20");
+        resourcePath = resourcePath.replace("%2520","%20");
         return super.getResource(resourcePath, location);
     }
 }

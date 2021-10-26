@@ -15,4 +15,6 @@ public interface ElementAccessService {
     ElementAccessDTO openAccess(UUID link, String type);
 
     ElementAccessDTO changeAccess(UUID link, String type);
+
+    void closeAccess(UUID link);
 }

@@ -54,7 +54,7 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
     @OneToMany(mappedBy = "element", fetch = FetchType.EAGER)
     private List<Starred> starreds;
 
-    @OneToOne(mappedBy = "element")
+    @OneToOne(mappedBy = "element", orphanRemoval = true)
     private ElementAccess access;
 
     public long getId() {

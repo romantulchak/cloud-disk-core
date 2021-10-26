@@ -102,7 +102,7 @@ public class FolderUtils {
         try (Stream<Path> walk = Files.walk(path)) {
             walk.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
-                    .forEach(File::deleteOnExit);
+                    .forEach(File::delete);
             throw new NoSuchFileException(folderPath);
         } catch (NoSuchFileException ex) {
             return true;
