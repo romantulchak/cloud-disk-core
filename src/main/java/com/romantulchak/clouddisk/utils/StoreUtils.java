@@ -8,12 +8,18 @@ import com.romantulchak.clouddisk.model.Trash;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+
+@Component
 public class StoreUtils {
 
     private StoreUtils() {
+
     }
 
     public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash) {

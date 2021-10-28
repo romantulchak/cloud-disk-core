@@ -156,28 +156,6 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    @Transactional
-    @Override
-    public void restoreFile(UUID fileLink) {
-        File file = fileRepository.findFileByLink(fileLink)
-                .orElseThrow(() -> new FileNotFoundException(fileLink));
-        if(file.getRemoveType() == RemoveType.PRE_REMOVED){
-            LocalPath path = new LocalPath()
-                    .setFullPath(file.getPath().getOldFullPath())
-                    .setShortPath(file.getPath().getOldShortPath())
-                    .setOldFullPath(file.getPath().getFullPath())
-                    .setOldShortPath(file.getPath().getShortPath());
-            file.setRemoveType(RemoveType.SAVED)
-                    .setTrash(null)
-                    .setPath(path);
-            boolean isMoved = folderUtils.restoreFile(path.getOldShortPath(), path.getShortPath());
-            removeRepository.deleteByElementId(file.getId());
-            if(isMoved){
-                fileRepository.save(file);
-            }
-        }
-    }
-
     private void createPreRemove(File file, String pathInTrash) {
         PreRemove remove = new PreRemove(file, pathInTrash);
         removeRepository.save(remove);

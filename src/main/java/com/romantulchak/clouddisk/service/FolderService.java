@@ -35,4 +35,5 @@ public interface FolderService {
     void preRemoveFolder(UUID folderLink, String driveName);
 
     FolderDTO changeColor(UUID folderLink, String color);
+
 }

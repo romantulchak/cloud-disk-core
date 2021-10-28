@@ -92,7 +92,7 @@ public class FolderUtils {
             return new LocalPath(fullPath, shortPath);
         }catch (IllegalStateException | IOException e){
             LOGGER.error(e.getMessage());
-            throw new FileAlreadyMovedException();
+            throw new FileAlreadyMovedException(multipartFile.getOriginalFilename());
         }
     }
 
@@ -121,11 +121,11 @@ public class FolderUtils {
             return new LocalPath(getFullPath(getFileRelativePath(localPath)), localPath);
         }catch (IllegalStateException | IOException e){
             LOGGER.error(e.getMessage());
-            throw new FileAlreadyMovedException();
+            throw new FileAlreadyMovedException(filename);
         }
     }
 
-    public boolean restoreFile(String oldPath, String newPath) {
+    public boolean restoreElement(String oldPath, String newPath) {
         try {
             Path oldShortPath = Paths.get(oldPath);
             Path newShortPath = Paths.get(newPath);
@@ -133,7 +133,7 @@ public class FolderUtils {
             return true;
         }catch (IllegalStateException | IOException e){
             LOGGER.error(e.getMessage());
-            throw new FileAlreadyMovedException();
+            throw new FileAlreadyMovedException(oldPath);
         }
     }
 
