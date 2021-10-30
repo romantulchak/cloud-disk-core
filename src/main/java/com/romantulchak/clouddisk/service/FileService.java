@@ -23,7 +23,5 @@ public interface FileService {
 
     CompletableFuture<FileDTO> uploadFileIntoDrive(MultipartFile file, String driveName, Authentication authentication);
 
-    void deleteFile(UUID fileLink);
-
     ResponseEntity<Resource> downloadFile(UUID link) throws IOException;
 }

@@ -28,8 +28,6 @@ public interface FolderService {
 
     List<FolderDTO> findRemovedFoldersByTrashId(long id);
 
-    void removeFolder(UUID folderLink);
-
     ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException;
 
     FolderDTO changeColor(UUID folderLink, String color);

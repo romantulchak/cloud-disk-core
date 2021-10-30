@@ -40,12 +40,6 @@ public class FileController {
         return fileService.uploadFileIntoDrive(file, driveName, authentication).get();
     }
 
-    @DeleteMapping("/delete-file/{fileLink}")
-    @PreAuthorize("hasRole('USER') AND @userFileAccess.hasAccess(#fileLink, authentication)")
-    public void deleteFileInFolder(@PathVariable("fileLink") UUID fileLink) {
-        fileService.deleteFile(fileLink);
-    }
-
     @GetMapping(value = "/download-file/{fileLink}")
     @ResponseBody
     public ResponseEntity<Resource> downloadFile(@PathVariable("fileLink") UUID link) throws IOException {

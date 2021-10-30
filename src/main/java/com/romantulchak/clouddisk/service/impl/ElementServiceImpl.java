@@ -72,6 +72,20 @@ public class ElementServiceImpl implements ElementService {
         }
     }
 
+
+    @Transactional
+    @Override
+    public void removeElement(UUID link) {
+        StoreAbstract element = storeRepository.findByLink(link)
+                .orElseThrow(() -> new FileNotFoundException(link));
+        boolean isDeleted = folderUtils.removeElement(element.getPath().getShortPath());
+        if (isDeleted) {
+            removeRepository.deleteByElementId(element.getId());
+            storeRepository.delete(element);
+        }
+    }
+
+
     private void createPreRemove(StoreAbstract element, String pathInTrash) {
         PreRemove remove = new PreRemove(element, pathInTrash);
         removeRepository.save(remove);

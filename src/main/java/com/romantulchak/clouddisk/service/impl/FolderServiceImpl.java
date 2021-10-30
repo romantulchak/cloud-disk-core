@@ -167,17 +167,6 @@ public class FolderServiceImpl implements FolderService {
                 .collect(Collectors.toList());
     }
 
-    @Async
-    @Override
-    public void removeFolder(UUID folderLink) {
-        Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
-        boolean isDeleted = folderUtils.removeElement(folder.getPath().getShortPath());
-        if (isDeleted) {
-            removeRepository.deleteByElementId(folder.getId());
-            folderRepository.deleteFolderByLink(folderLink);
-        }
-    }
-
     @Override
     public ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException {
         Folder folder = folderRepository.findFolderByLink(folderLink)

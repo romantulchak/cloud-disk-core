@@ -32,4 +32,10 @@ public class ElementController {
         elementService.preRemoveElement(link, driveName);
     }
 
+    @DeleteMapping("/remove/{link}")
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#link, authentication)")
+    public void removeElement(@PathVariable("link") UUID link){
+        elementService.removeElement(link);
+    }
+
 }

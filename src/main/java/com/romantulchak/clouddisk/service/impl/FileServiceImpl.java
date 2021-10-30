@@ -132,17 +132,6 @@ public class FileServiceImpl implements FileService {
         return CompletableFuture.completedFuture(convertToDTO(file, View.FolderFileView.class));
     }
 
-    @Transactional
-    @Override
-    public void deleteFile(UUID fileLink) {
-        File file = fileRepository.findFileByLink(fileLink).orElseThrow(() -> new FileNotFoundException(fileLink));
-        boolean isDeleted = folderUtils.removeElement(file.getPath().getShortPath());
-        if (isDeleted) {
-            removeRepository.deleteByElementId(file.getId());
-            fileRepository.delete(file);
-        }
-    }
-
     @Override
     public ResponseEntity<Resource> downloadFile(UUID link) throws IOException {
         File file = fileRepository.findFileByLink(link).orElseThrow(() -> new FileNotFoundException(link));

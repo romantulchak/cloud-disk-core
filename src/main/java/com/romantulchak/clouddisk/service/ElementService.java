@@ -8,4 +8,5 @@ public interface ElementService {
 
     void preRemoveElement(UUID elementLink, String driveName);
 
+    void removeElement(UUID link);
 }

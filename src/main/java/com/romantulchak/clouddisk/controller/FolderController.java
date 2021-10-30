@@ -57,12 +57,6 @@ public class FolderController {
         return folderService.findSubFoldersInFolder(folderLink);
     }
 
-    @DeleteMapping("/remove/{folderLink}")
-    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
-    public void removeFolder(@PathVariable("folderLink") UUID folderLink){
-        folderService.removeFolder(folderLink);
-    }
-
     @GetMapping("/download-folder/{folderLink}")
     @ResponseBody
     public ResponseEntity<Resource> downloadFolder(@PathVariable("folderLink") UUID folderLink) throws IOException {
