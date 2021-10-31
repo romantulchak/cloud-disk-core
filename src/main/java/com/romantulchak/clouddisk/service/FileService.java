@@ -17,8 +17,6 @@ public interface FileService {
 
     List<FileDTO> findFilesInDrive(String driveName);
 
-    List<FileDTO> findRemovedFilesByTrashId(long id);
-
     CompletableFuture<FileDTO> uploadFileIntoFolder(MultipartFile file, UUID folderLink, Authentication authentication);
 
     CompletableFuture<FileDTO> uploadFileIntoDrive(MultipartFile file, String driveName, Authentication authentication);

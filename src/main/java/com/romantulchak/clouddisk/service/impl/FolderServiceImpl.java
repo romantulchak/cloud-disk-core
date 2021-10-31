@@ -39,8 +39,6 @@ public class FolderServiceImpl implements FolderService {
     private final DriveRepository driveRepository;
     private final FileService fileService;
     private final FolderUtils folderUtils;
-    private final TrashRepository trashRepository;
-    private final PreRemoveRepository removeRepository;
     private final ElementAccessRepository elementAccessRepository;
     private final EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker;
 
@@ -58,8 +56,6 @@ public class FolderServiceImpl implements FolderService {
         this.driveRepository = driveRepository;
         this.fileService = fileService;
         this.folderUtils = folderUtils;
-        this.trashRepository = trashRepository;
-        this.removeRepository = removeRepository;
         this.entityMapperInvoker = entityMapperInvoker;
         this.elementAccessRepository = elementAccessRepository;
     }
@@ -146,25 +142,6 @@ public class FolderServiceImpl implements FolderService {
         stores.addAll(subFolders);
         stores.addAll(filesInFolder);
         return stores;
-    }
-
-    @Override
-    public List<Store> findRemovedElements(String driveName) {
-        Trash trash = trashRepository.findTrashByDriveName(driveName)
-                .orElseThrow(() -> new TrashNotFoundException(driveName));
-        List<FolderDTO> folders = findRemovedFoldersByTrashId(trash.getId());
-        List<FileDTO> files = fileService.findRemovedFilesByTrashId(trash.getId());
-        List<Store> stores = new ArrayList<>();
-        stores.addAll(folders);
-        stores.addAll(files);
-        return stores;
-    }
-
-    @Override
-    public List<FolderDTO> findRemovedFoldersByTrashId(long id) {
-        return folderRepository.findAllByTrashId(id).stream()
-                .map(folder -> convertToDTO(folder, View.FolderFileView.class))
-                .collect(Collectors.toList());
     }
 
     @Override

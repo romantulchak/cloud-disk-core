@@ -1,5 +1,8 @@
 package com.romantulchak.clouddisk.service.impl;
 
+import com.mapperDTO.mapper.EntityMapperInvoker;
+import com.romantulchak.clouddisk.dto.FileDTO;
+import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.exception.FileNotFoundException;
 import com.romantulchak.clouddisk.exception.ObjectAlreadyPreRemovedException;
 import com.romantulchak.clouddisk.model.*;
@@ -14,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ElementServiceImpl implements ElementService {
@@ -23,16 +29,22 @@ public class ElementServiceImpl implements ElementService {
     private final FolderUtils folderUtils;
     private final PreRemoveRepository removeRepository;
     private final TrashService trashService;
+    private final EntityMapperInvoker<Folder, FolderDTO> folderMapper;
+    private final EntityMapperInvoker<File, FileDTO> fileMapper;
 
     @Autowired
     public ElementServiceImpl(StoreRepository storeRepository,
                               FolderUtils folderUtils,
                               PreRemoveRepository removeRepository,
-                              TrashService trashService) {
+                              TrashService trashService,
+                              EntityMapperInvoker<Folder, FolderDTO> folderMapper,
+                              EntityMapperInvoker<File, FileDTO> fileMapper) {
         this.storeRepository = storeRepository;
         this.folderUtils = folderUtils;
         this.removeRepository = removeRepository;
         this.trashService = trashService;
+        this.folderMapper = folderMapper;
+        this.fileMapper = fileMapper;
     }
 
     @Transactional
@@ -85,9 +97,26 @@ public class ElementServiceImpl implements ElementService {
         }
     }
 
+    @Override
+    public List<Store> findRemovedElements(String driveName) {
+        Trash trash = trashService.getTrashByDriveName(driveName);
+        return storeRepository.findAllByTrashId(trash.getId())
+                .stream()
+                .sorted((Comparator.comparing(storeAbstract -> storeAbstract.getPreRemove().getAddedToTrash())))
+                .map(element -> convertToFolderDTO(element, View.FolderFileView.class))
+                .collect(Collectors.toList());
+    }
 
     private void createPreRemove(StoreAbstract element, String pathInTrash) {
         PreRemove remove = new PreRemove(element, pathInTrash);
         removeRepository.save(remove);
+    }
+
+    private Store convertToFolderDTO(StoreAbstract element, Class<?> classToCheck){
+        if (element instanceof Folder){
+            return folderMapper.entityToDTO((Folder) element, FolderDTO.class, classToCheck);
+        }else{
+            return fileMapper.entityToDTO((File) element, FileDTO.class, classToCheck);
+        }
     }
 }

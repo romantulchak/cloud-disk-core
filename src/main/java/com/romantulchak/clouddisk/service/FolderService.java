@@ -24,10 +24,6 @@ public interface FolderService {
 
     List<StoreAbstractDTO> findSubFoldersInFolder(UUID folderLink);
 
-    List<Store> findRemovedElements(String driveName);
-
-    List<FolderDTO> findRemovedFoldersByTrashId(long id);
-
     ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException;
 
     FolderDTO changeColor(UUID folderLink, String color);

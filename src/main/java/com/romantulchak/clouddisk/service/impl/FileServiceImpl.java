@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -73,13 +72,6 @@ public class FileServiceImpl implements FileService {
     public List<FileDTO> findFilesInDrive(String driveName) {
         return fileRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED).stream()
                 .sorted()
-                .map(file -> convertToDTO(file, View.FolderFileView.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<FileDTO> findRemovedFilesByTrashId(long id) {
-        return fileRepository.findAllByTrashId(id).stream()
                 .map(file -> convertToDTO(file, View.FolderFileView.class))
                 .collect(Collectors.toList());
     }

@@ -26,6 +26,8 @@ public interface StoreRepository extends JpaRepository<StoreAbstract, Long> {
 
     boolean existsByLinkAndOwnerId(UUID link, long id);
 
+    List<StoreAbstract> findAllByTrashId(long id);
+
     @Modifying
     @Query("UPDATE StoreAbstract s SET s.hasLinkAccess = :hasLinkAccess WHERE s.id = :id")
     void updateLinkAccess(@Param("hasLinkAccess") boolean hasLinkAccess, @Param("id") long id);
