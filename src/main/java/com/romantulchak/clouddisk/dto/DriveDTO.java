@@ -1,5 +1,6 @@
 package com.romantulchak.clouddisk.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mapperDTO.annotation.DTO;
 import com.mapperDTO.annotation.MapToDTO;

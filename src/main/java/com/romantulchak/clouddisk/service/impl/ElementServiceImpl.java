@@ -69,6 +69,7 @@ public class ElementServiceImpl implements ElementService {
         }
     }
 
+    //TODO: add sub-folders for delete
     @Transactional
     @Override
     public void preRemoveElement(UUID elementLink, String driveName) {

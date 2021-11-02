@@ -1,5 +1,6 @@
 package com.romantulchak.clouddisk.utils;
 
+import com.romantulchak.clouddisk.constant.FilenameConstant;
 import com.romantulchak.clouddisk.exception.RemoveElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +23,10 @@ public final class ZipUtils {
 
     }
 
+    //TODO: remove zip after creation
     public static Path createZip(String elementName, String shortPath) throws IOException {
         String parentRootPath = FileUtils.getParentRootPath(shortPath);
-        String zipPath = String.join("/", parentRootPath, elementName + UUID.randomUUID());
+        String zipPath = String.join(FilenameConstant.SLASH, parentRootPath, elementName + UUID.randomUUID());
         Path path = Files.createFile(Paths.get(zipPath + ".zip"));
         try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(path))) {
             Path sourcePath = Paths.get(shortPath);
@@ -62,7 +64,7 @@ public final class ZipUtils {
     }
 
     private static void addFolderToZip(ZipOutputStream zs, Path p) {
-        ZipEntry zipEntry = new ZipEntry(p.toFile().getName() + "/");
+        ZipEntry zipEntry = new ZipEntry(p.toFile().getName() + FilenameConstant.SLASH);
         try {
             zs.putNextEntry(zipEntry);
             zs.closeEntry();

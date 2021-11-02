@@ -208,7 +208,7 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
     @Override
     public int compareTo(StoreAbstract o) {
         return Comparator.comparing(StoreAbstract::getName)
-                .thenComparing(StoreAbstract::getCreateAt)
+                .thenComparing(StoreAbstract::getId)
                 .compare(this, o);
     }
 }

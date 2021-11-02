@@ -25,6 +25,9 @@ public class Folder extends StoreAbstract{
 
     private String color;
 
+    @Transient
+    private String mainFolderIdentifier;
+
     public Folder() {
         this.color = FolderColorType.MOUSE.getColor();
     }
@@ -126,6 +129,15 @@ public class Folder extends StoreAbstract{
 
     public Folder setColor(String color) {
         this.color = color;
+        return this;
+    }
+
+    public String getMainFolderIdentifier() {
+        return mainFolderIdentifier;
+    }
+
+    public Folder setMainFolderIdentifier(String mainFolderIdentifier) {
+        this.mainFolderIdentifier = mainFolderIdentifier;
         return this;
     }
 }

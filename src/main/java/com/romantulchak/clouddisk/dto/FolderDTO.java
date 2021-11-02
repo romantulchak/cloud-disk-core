@@ -6,11 +6,6 @@ import com.mapperDTO.annotation.MapToDTO;
 import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.model.enums.ContextType;
-import com.romantulchak.clouddisk.model.enums.FolderColorType;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @DTO
 public class FolderDTO extends StoreAbstractDTO implements Store {

@@ -1,5 +1,6 @@
 package com.romantulchak.clouddisk.utils;
 
+import com.romantulchak.clouddisk.constant.FilenameConstant;
 import com.romantulchak.clouddisk.exception.CreateFolderException;
 import com.romantulchak.clouddisk.exception.FileAlreadyMovedException;
 import com.romantulchak.clouddisk.exception.FileWithNameAlreadyExistsException;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Comparator;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 
@@ -23,6 +25,8 @@ import java.util.stream.Stream;
 public class FolderUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FolderUtils.class);
+
+    private static final String LAST_SLASH_REGEX = "\\/$";
 
     private final String drivePath;
 
@@ -37,32 +41,36 @@ public class FolderUtils {
 
     public LocalPath createDrive(String driveName) {
         try {
-            String shorPath = String.join("/", drivePath, driveName);
+            String shorPath = String.join(FilenameConstant.SLASH, drivePath, driveName);
             Path path = Paths.get(shorPath);
             Files.createDirectory(path);
             String fullPath = getFullPath(driveName);
             return new LocalPath(fullPath, shorPath);
-        }catch (FileAlreadyExistsException ex){
+        } catch (FileAlreadyExistsException ex) {
             LOGGER.error(ex.getMessage());
             throw new FileWithNameAlreadyExistsException(driveName);
-        }catch (IOException ex){
+        } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
             throw new CreateFolderException();
         }
     }
 
 
-    public LocalPath createFolder(String folderName, String shortPath) {
+    public LocalPath createFolder(String shortPath) {
+        String folderName = UUID.randomUUID().toString();
         try {
-            String folderPath = String.join("/", shortPath, folderName);
+            String folderPath = String.join(FilenameConstant.SLASH, shortPath, folderName);
             Path path = Paths.get(folderPath);
-            Files.createDirectory(path);
+            boolean exists = Files.exists(path);
+            if (!exists) {
+                Files.createDirectory(path);
+            }
             String fullPath = getFullPath(getFileRelativePath(folderPath));
             return new LocalPath(fullPath, folderPath);
-        }catch (FileAlreadyExistsException ex){
+        } catch (FileAlreadyExistsException ex) {
             LOGGER.error(ex.getMessage());
             throw new FileWithNameAlreadyExistsException(folderName);
-        }catch (IOException ex){
+        } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
             throw new CreateFolderException();
         }
@@ -70,14 +78,14 @@ public class FolderUtils {
 
     public String createTrash(String trashName, String shortPath) {
         try {
-            String trashPath = String.join("/", shortPath, trashName);
+            String trashPath = String.join(FilenameConstant.SLASH, shortPath, trashName);
             Path path = Paths.get(trashPath);
             Files.createDirectory(path);
             return trashPath;
-        }catch (FileAlreadyExistsException ex){
+        } catch (FileAlreadyExistsException ex) {
             LOGGER.error(ex.getMessage());
             throw new FileWithNameAlreadyExistsException(trashName);
-        }catch (IOException ex){
+        } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
             throw new CreateFolderException();
         }
@@ -85,12 +93,13 @@ public class FolderUtils {
 
     public LocalPath uploadFile(MultipartFile multipartFile, String shortPath) {
         try {
-            shortPath = String.join("/", shortPath, multipartFile.getOriginalFilename());
+            shortPath = shortPath.replaceAll(LAST_SLASH_REGEX, "");
+            shortPath = String.join(FilenameConstant.SLASH, shortPath, UUID.randomUUID() + FileUtils.getFileExtension(multipartFile.getOriginalFilename()));
             Path path = Paths.get(shortPath);
             String fullPath = getFullPath(getFileRelativePath(shortPath));
             multipartFile.transferTo(path);
             return new LocalPath(fullPath, shortPath);
-        }catch (IllegalStateException | IOException e){
+        } catch (IllegalStateException | IOException e) {
             LOGGER.error(e.getMessage());
             throw new FileAlreadyMovedException(multipartFile.getOriginalFilename());
         }
@@ -112,14 +121,14 @@ public class FolderUtils {
         }
     }
 
-    public LocalPath moveFileToTrash(String filePath, String trashPath, String filename){
+    public LocalPath moveFileToTrash(String filePath, String trashPath, String filename) {
         try {
-            String localPath = String.join("/", trashPath, filename);
+            String localPath = String.join(FilenameConstant.SLASH, trashPath, filename);
             Path shortTrashPath = Paths.get(localPath);
             Path shortFilePath = Paths.get(filePath);
             Files.move(shortFilePath, shortTrashPath, StandardCopyOption.REPLACE_EXISTING);
             return new LocalPath(getFullPath(getFileRelativePath(localPath)), localPath);
-        }catch (IllegalStateException | IOException e){
+        } catch (IllegalStateException | IOException e) {
             LOGGER.error(e.getMessage());
             throw new FileAlreadyMovedException(filename);
         }
@@ -131,7 +140,7 @@ public class FolderUtils {
             Path newShortPath = Paths.get(newPath);
             Files.move(oldShortPath, newShortPath);
             return true;
-        }catch (IllegalStateException | IOException e){
+        } catch (IllegalStateException | IOException e) {
             LOGGER.error(e.getMessage());
             throw new FileAlreadyMovedException(oldPath);
         }
@@ -140,7 +149,7 @@ public class FolderUtils {
     //TODO: fix regex
     private String getFileRelativePath(String path) {
         String osName = SystemUtils.OS_NAME;
-        if (osName.contains("Windows")){
+        if (osName.contains("Windows")) {
             return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
         }
         return path.replace("home\\/cloud-disk-files\\/", "");

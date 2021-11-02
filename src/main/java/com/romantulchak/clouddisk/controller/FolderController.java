@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 @RestController
 @CrossOrigin(value = "*", maxAge = 3600L)
-@RequestMapping("/api/folders")
+@RequestMapping("/api/folder")
 public class FolderController {
 
     private final FolderService folderService;
@@ -68,5 +69,12 @@ public class FolderController {
     @JsonView(View.FolderFileView.class)
     public FolderDTO changeColor(@PathVariable("folderLink") UUID folderLink, @RequestBody String color){
         return folderService.changeColor(folderLink, color);
+    }
+
+    @PostMapping(value = "/upload")
+    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
+    @JsonView(View.FolderFileView.class)
+    public FolderDTO uploadIntoDrive(@RequestPart(value = "files") List<MultipartFile> files, @RequestPart(value = "driveName") String driveName){
+        return folderService.uploadIntoDrive(files, driveName);
     }
 }

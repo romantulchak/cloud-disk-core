@@ -7,6 +7,7 @@ import com.romantulchak.clouddisk.model.Store;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,4 +29,5 @@ public interface FolderService {
 
     FolderDTO changeColor(UUID folderLink, String color);
 
+    FolderDTO uploadIntoDrive(List<MultipartFile> files, String driveName);
 }
