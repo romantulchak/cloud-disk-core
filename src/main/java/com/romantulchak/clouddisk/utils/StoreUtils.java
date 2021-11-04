@@ -23,7 +23,7 @@ public class StoreUtils {
     }
 
     public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash) {
-        LocalPath path = folderUtils.moveFileToTrash(element.getPath().getShortPath(), trash.getPath(), element.getName());
+        LocalPath path = folderUtils.moveFileToTrash(element.getPath().getShortPath(), trash.getPath(), FileUtils.getName(element.getPath().getShortPath()));
         LocalPath newPath = new LocalPath()
                 .setOldFullPath(element.getPath().getFullPath())
                 .setOldShortPath(element.getPath().getShortPath())

@@ -48,4 +48,11 @@ public class ElementController {
     public List<Store> getRemovedElements(@PathVariable("driveName") String driveName){
         return elementService.findRemovedElements(driveName);
     }
+
+    @GetMapping("/{driveName}")
+    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
+    @JsonView(View.FolderFileView.class)
+    public List<Store> findAllElementsForDrive(@PathVariable("driveName") String driveName){
+        return elementService.findElementsForDrive(driveName);
+    }
 }

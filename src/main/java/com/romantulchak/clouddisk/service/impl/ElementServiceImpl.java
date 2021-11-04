@@ -3,6 +3,7 @@ package com.romantulchak.clouddisk.service.impl;
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
+import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
 import com.romantulchak.clouddisk.exception.FileNotFoundException;
 import com.romantulchak.clouddisk.exception.ObjectAlreadyPreRemovedException;
 import com.romantulchak.clouddisk.model.*;
@@ -52,7 +53,7 @@ public class ElementServiceImpl implements ElementService {
     public void restoreElement(UUID elementLink) {
         StoreAbstract element = storeRepository.findByLink(elementLink)
                 .orElseThrow(() -> new FileNotFoundException(elementLink));
-        if(element.getRemoveType() == RemoveType.PRE_REMOVED){
+        if (element.getRemoveType() == RemoveType.PRE_REMOVED) {
             LocalPath path = new LocalPath()
                     .setFullPath(element.getPath().getOldFullPath())
                     .setShortPath(element.getPath().getOldShortPath())
@@ -63,13 +64,12 @@ public class ElementServiceImpl implements ElementService {
                     .setPath(path);
             boolean isMoved = folderUtils.restoreElement(path.getOldShortPath(), path.getShortPath());
             removeRepository.deleteByElementId(element.getId());
-            if(isMoved){
+            if (isMoved) {
                 storeRepository.save(element);
             }
         }
     }
 
-    //TODO: add sub-folders for delete
     @Transactional
     @Override
     public void preRemoveElement(UUID elementLink, String driveName) {
@@ -104,7 +104,16 @@ public class ElementServiceImpl implements ElementService {
         return storeRepository.findAllByTrashId(trash.getId())
                 .stream()
                 .sorted((Comparator.comparing(storeAbstract -> storeAbstract.getPreRemove().getAddedToTrash())))
-                .map(element -> convertToFolderDTO(element, View.FolderFileView.class))
+                .map(element -> convertToDTO(element, View.FolderFileView.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Store> findElementsForDrive(String driveName) {
+        return storeRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED)
+                .stream()
+                .sorted()
+                .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
     }
 
@@ -113,11 +122,14 @@ public class ElementServiceImpl implements ElementService {
         removeRepository.save(remove);
     }
 
-    private Store convertToFolderDTO(StoreAbstract element, Class<?> classToCheck){
-        if (element instanceof Folder){
-            return folderMapper.entityToDTO((Folder) element, FolderDTO.class, classToCheck);
-        }else{
-            return fileMapper.entityToDTO((File) element, FileDTO.class, classToCheck);
+    private Store convertToDTO(StoreAbstract element, Class<?> classToCheck) {
+        StoreAbstractDTO storeAbstractDTO;
+        if (element instanceof Folder) {
+            storeAbstractDTO = folderMapper.entityToDTO((Folder) element, FolderDTO.class, classToCheck);
+        } else {
+            storeAbstractDTO = fileMapper.entityToDTO((File) element, FileDTO.class, classToCheck);
         }
+        return storeAbstractDTO.setNoticed(StoreUtils.isStarred(element))
+                .setOwner(StoreUtils.isOwner(element));
     }
 }

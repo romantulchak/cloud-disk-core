@@ -10,8 +10,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.Objects;
 
 public class FileUtils {
@@ -74,15 +76,6 @@ public class FileUtils {
         return name;
     }
 
-    public static String get(String name) {
-        int indexOfLastSlash = name.lastIndexOf(FilenameConstant.SLASH);
-        if (indexOfLastSlash != -1) {
-            name = name.substring(0, indexOfLastSlash);
-        }
-        return name;
-    }
-
-
     public static String getFileName(MultipartFile file) {
         String fileName = Objects.requireNonNull(file.getOriginalFilename());
         int indexOfLastSlash = fileName.lastIndexOf(FilenameConstant.SLASH);
@@ -103,5 +96,17 @@ public class FileUtils {
             name = name.substring(indexOfLastSlash + 1);
         }
         return name;
+    }
+
+    public static String encodeElementName(String name) {
+        name = FileUtils.getName(name);
+        return Base64.getEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)) + FilenameConstant.FILE_NAME_SEPARATOR;
+    }
+
+    public static String decodeElementName(String encodedName) {
+        int indexOfSeparator = encodedName.indexOf(FilenameConstant.FILE_NAME_SEPARATOR);
+        encodedName = encodedName.substring(0, indexOfSeparator);
+        byte[] decode = Base64.getDecoder().decode(encodedName);
+        return new String(decode);
     }
 }

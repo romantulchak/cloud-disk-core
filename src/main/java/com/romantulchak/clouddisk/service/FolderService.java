@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface FolderService {
 
@@ -19,15 +20,15 @@ public interface FolderService {
 
     Folder findFolderByLink(UUID folderLink);
 
-    List<Store> findAllFoldersForDrive(String drive);
-
     FolderDTO createSubFolder(String folderName, UUID folderLink, Authentication authentication);
 
-    List<StoreAbstractDTO> findSubFoldersInFolder(UUID folderLink);
+    List<Store> findSubFoldersInFolder(UUID folderLink);
 
     ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException;
 
     FolderDTO changeColor(UUID folderLink, String color);
 
-    FolderDTO uploadIntoDrive(List<MultipartFile> files, String driveName);
+    CompletableFuture<FolderDTO> uploadInDrive(List<MultipartFile> files, String driveName);
+
+    CompletableFuture<FolderDTO> uploadInFolder(List<MultipartFile> files, String folderLink);
 }

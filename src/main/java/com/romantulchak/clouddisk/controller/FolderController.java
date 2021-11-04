@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @CrossOrigin(value = "*", maxAge = 3600L)
@@ -35,13 +36,6 @@ public class FolderController {
         return folderService.create(folderName, driveName, authentication);
     }
 
-    @GetMapping("/{driveName}")
-    @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
-    @JsonView(View.FolderFileView.class)
-    public List<Store> findAllFoldersForDrive(@PathVariable("driveName") String driveName){
-        return folderService.findAllFoldersForDrive(driveName);
-    }
-
     @PostMapping("/create-subfolder/{mainFolderLink}")
     @PreAuthorize("hasRole('USER') AND @userElementAccess.hasEditAccess(#folderLink, authentication)")
     @JsonView(View.FolderView.class)
@@ -54,7 +48,7 @@ public class FolderController {
     @GetMapping("/sub-folders/{folderLink}")
     @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
     @JsonView(View.FolderFileView.class)
-    public List<StoreAbstractDTO> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
+    public List<Store> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
         return folderService.findSubFoldersInFolder(folderLink);
     }
 
@@ -71,10 +65,19 @@ public class FolderController {
         return folderService.changeColor(folderLink, color);
     }
 
-    @PostMapping(value = "/upload")
+    @PostMapping(value = "/upload-in-drive")
     @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
     @JsonView(View.FolderFileView.class)
-    public FolderDTO uploadIntoDrive(@RequestPart(value = "files") List<MultipartFile> files, @RequestPart(value = "driveName") String driveName){
-        return folderService.uploadIntoDrive(files, driveName);
+    public FolderDTO uploadInDrive(@RequestPart(value = "files") List<MultipartFile> files, @RequestPart(value = "driveName") String driveName) throws ExecutionException, InterruptedException {
+        return folderService.uploadInDrive(files, driveName).get();
     }
+
+    @PostMapping(value = "/upload")
+    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication)")
+    @JsonView(View.FolderFileView.class)
+    public FolderDTO uploadIntoFolder(@RequestPart(value = "files") List<MultipartFile> files, @RequestPart(value = "folderLink") String link) throws ExecutionException, InterruptedException {
+        return folderService.uploadInFolder(files, link).get();
+    }
+
+
 }

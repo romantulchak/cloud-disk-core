@@ -1,5 +1,6 @@
 package com.romantulchak.clouddisk.controller;
 
+import com.romantulchak.clouddisk.exception.FileUploadException;
 import com.romantulchak.clouddisk.exception.FileWithNameAlreadyExistsException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,11 @@ public class AdvisorController extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = FileWithNameAlreadyExistsException.class)
     public ResponseEntity<Object> handleFileWithNameAlreadyExistsException(FileWithNameAlreadyExistsException ex, WebRequest webRequest){
+        Map<Object, Object> body = getBody(ex);
+        return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest);
+    }
+    @ExceptionHandler(value = FileUploadException.class)
+    public ResponseEntity<Object> handleFileUploadException(FileUploadException ex, WebRequest webRequest){
         Map<Object, Object> body = getBody(ex);
         return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest);
     }

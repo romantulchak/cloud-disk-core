@@ -3,6 +3,7 @@ package com.romantulchak.clouddisk.dto;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.mapperDTO.annotation.DTO;
 import com.mapperDTO.annotation.MapToDTO;
+import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @DTO
-public class StoreAbstractDTO {
+public class StoreAbstractDTO implements Store {
 
     @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
     @JsonView({View.FolderFileView.class, View.FolderView.class})

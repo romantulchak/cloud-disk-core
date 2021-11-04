@@ -1,10 +1,7 @@
 package com.romantulchak.clouddisk.utils;
 
 import com.romantulchak.clouddisk.constant.FilenameConstant;
-import com.romantulchak.clouddisk.exception.CreateFolderException;
-import com.romantulchak.clouddisk.exception.FileAlreadyMovedException;
-import com.romantulchak.clouddisk.exception.FileWithNameAlreadyExistsException;
-import com.romantulchak.clouddisk.exception.RemoveElementException;
+import com.romantulchak.clouddisk.exception.*;
 import com.romantulchak.clouddisk.model.LocalPath;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
@@ -15,10 +12,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import static com.romantulchak.clouddisk.utils.FileUtils.*;
 
 
 @Component
@@ -56,8 +57,8 @@ public class FolderUtils {
     }
 
 
-    public LocalPath createFolder(String shortPath) {
-        String folderName = UUID.randomUUID().toString();
+    public LocalPath createFolder(String shortPath, String realFolderName) {
+        String folderName = FileUtils.encodeElementName(realFolderName) + UUID.randomUUID();
         try {
             String folderPath = String.join(FilenameConstant.SLASH, shortPath, folderName);
             Path path = Paths.get(folderPath);
@@ -91,17 +92,20 @@ public class FolderUtils {
         }
     }
 
-    public LocalPath uploadFile(MultipartFile multipartFile, String shortPath) {
+    public LocalPath uploadFile(MultipartFile file, String shortPath) {
         try {
             shortPath = shortPath.replaceAll(LAST_SLASH_REGEX, "");
-            shortPath = String.join(FilenameConstant.SLASH, shortPath, UUID.randomUUID() + FileUtils.getFileExtension(multipartFile.getOriginalFilename()));
+            String fileName = encodeElementName(file.getOriginalFilename()) + UUID.randomUUID() + getFileExtension(file.getOriginalFilename());
+            shortPath = String.join(FilenameConstant.SLASH, shortPath, fileName);
             Path path = Paths.get(shortPath);
             String fullPath = getFullPath(getFileRelativePath(shortPath));
-            multipartFile.transferTo(path);
+            file.transferTo(path);
             return new LocalPath(fullPath, shortPath);
+        } catch (FileSystemException e) {
+            throw new FileUploadException(e.getReason(), file.getOriginalFilename());
         } catch (IllegalStateException | IOException e) {
             LOGGER.error(e.getMessage());
-            throw new FileAlreadyMovedException(multipartFile.getOriginalFilename());
+            throw new FileAlreadyMovedException(file.getOriginalFilename());
         }
     }
 

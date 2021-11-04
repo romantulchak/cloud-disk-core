@@ -15,4 +15,6 @@ public interface ElementService {
 
     List<Store> findRemovedElements(String driveName);
 
+    List<Store> findElementsForDrive(String driveName);
+
 }

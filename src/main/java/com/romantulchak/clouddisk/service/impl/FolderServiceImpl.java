@@ -19,6 +19,7 @@ import com.romantulchak.clouddisk.utils.ZipUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,7 +84,7 @@ public class FolderServiceImpl implements FolderService {
                 .setCreateAt(LocalDateTime.now())
                 .setUploadAt(LocalDateTime.now())
                 .setSubFolders(new ArrayList<>());
-        LocalPath path = folderUtils.createFolder(shortPath);
+        LocalPath path = folderUtils.createFolder(shortPath, folderName);
         folder.setPath(path);
         return folder;
     }
@@ -92,20 +94,6 @@ public class FolderServiceImpl implements FolderService {
         User user = new User(userDetails.getId(), userDetails.getFirstName(), userDetails.getLastName());
         return getFolder(folderName, user, shortPath);
 
-    }
-
-    @Override
-    public List<Store> findAllFoldersForDrive(String driveName) {
-        List<FolderDTO> folders = folderRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED)
-                .stream()
-                .sorted()
-                .map(folder -> convertToDTO(folder, View.FolderFileView.class))
-                .collect(Collectors.toList());
-        List<FileDTO> files = fileService.findFilesInDrive(driveName);
-        List<Store> stores = new ArrayList<>();
-        stores.addAll(folders);
-        stores.addAll(files);
-        return stores;
     }
 
     @Transactional
@@ -127,14 +115,14 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public List<StoreAbstractDTO> findSubFoldersInFolder(UUID folderLink) {
+    public List<Store> findSubFoldersInFolder(UUID folderLink) {
         List<FolderDTO> subFolders = folderRepository.findSubFolders(folderLink, RemoveType.SAVED.name())
                 .stream()
                 .sorted()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
         List<FileDTO> filesInFolder = fileService.findFilesInFolder(folderLink);
-        List<StoreAbstractDTO> stores = new ArrayList<>();
+        List<Store> stores = new ArrayList<>();
         stores.addAll(subFolders);
         stores.addAll(filesInFolder);
         return stores;
@@ -158,27 +146,31 @@ public class FolderServiceImpl implements FolderService {
         return convertToDTO(folder, View.FolderFileView.class);
     }
 
+    @Async
     @Transactional
     @Override
-    public FolderDTO uploadIntoDrive(List<MultipartFile> files, String driveName) {
+    public CompletableFuture<FolderDTO> uploadInDrive(List<MultipartFile> files, String driveName) {
         Drive drive = driveRepository.findDriveByName(driveName)
                 .orElseThrow(() -> new DriveNotFoundException(driveName));
-        List<String> createdFolders = new ArrayList<>();
-        List<Folder> folders = new ArrayList<>();
-        Folder subFolder = null;
-        for (MultipartFile file : files) {
-            String mainFolderPath = FileUtils.getFolderPath(file.getOriginalFilename());
-            if (!createdFolders.contains(mainFolderPath)) {
-                String path = drive.getShortPath();
-                subFolder = checkIfMainFolderExists(mainFolderPath, path, folders, drive.getOwner());
-            }
-            fileService.getFile(file, FileUtils.getFileName(file), drive.getOwner(), subFolder);
-            createdFolders.add(mainFolderPath);
-        }
-        subFolder = folders.get(0);
-        subFolder.setDrive(drive);
+        List<Folder> folders = uploadFolder(files, drive.getOwner(), drive.getShortPath());
+        Folder folder = folders.get(0);
+        folder = folder.setDrive(drive);
         folderRepository.saveAll(folders);
-        return convertToDTO(subFolder, View.FolderFileView.class);
+        return CompletableFuture.completedFuture(convertToDTO(folder, View.FolderFileView.class));
+    }
+
+    @Async
+    @Transactional
+    @Override
+    public CompletableFuture<FolderDTO> uploadInFolder(List<MultipartFile> files, String folderLink) {
+        UUID link = UUID.fromString(folderLink);
+        Folder folder = folderRepository.findFolderByLink(link).orElseThrow(() -> new FolderNotFoundException(link));
+        List<Folder> folders = uploadFolder(files, folder.getOwner(), folder.getPath().getShortPath());
+        Folder subFolder = folders.get(0);
+        folder.getSubFolders().add(subFolder);
+        folders.add(folder);
+        folderRepository.saveAll(folders);
+        return CompletableFuture.completedFuture(convertToDTO(subFolder, View.FolderFileView.class));
     }
 
     private Folder checkIfMainFolderExists(String folderName, String pathToFile, List<Folder> folders, User user) {
@@ -208,6 +200,21 @@ public class FolderServiceImpl implements FolderService {
         return folder;
     }
 
+
+    private List<Folder> uploadFolder(List<MultipartFile> files, User owner, String path) {
+        List<String> createdFolders = new ArrayList<>();
+        List<Folder> folders = new ArrayList<>();
+        Folder subFolder = null;
+        for (MultipartFile file : files) {
+            String mainFolderPath = FileUtils.getFolderPath(file.getOriginalFilename());
+            if (!createdFolders.contains(mainFolderPath)) {
+                subFolder = checkIfMainFolderExists(mainFolderPath, path, folders, owner);
+                createdFolders.add(mainFolderPath);
+            }
+            fileService.getFile(file, FileUtils.getFileName(file), owner, subFolder);
+        }
+        return folders;
+    }
 
     private FolderDTO convertToDTO(Folder folder, Class<?> classToCheck) {
         return entityMapperInvoker.entityToDTO(folder, FolderDTO.class, classToCheck)

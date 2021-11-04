@@ -1,7 +1,7 @@
 package com.romantulchak.clouddisk.repository;
 
 import com.romantulchak.clouddisk.model.StoreAbstract;
-import org.springframework.data.jpa.repository.EntityGraph;
+import com.romantulchak.clouddisk.model.enums.RemoveType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +31,6 @@ public interface StoreRepository extends JpaRepository<StoreAbstract, Long> {
     @Modifying
     @Query("UPDATE StoreAbstract s SET s.hasLinkAccess = :hasLinkAccess WHERE s.id = :id")
     void updateLinkAccess(@Param("hasLinkAccess") boolean hasLinkAccess, @Param("id") long id);
+
+    List<StoreAbstract> findAllByDriveNameAndRemoveType(String driveName, RemoveType removeType);
 }

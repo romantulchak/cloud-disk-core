@@ -23,7 +23,7 @@ public final class ZipUtils {
 
     }
 
-    //TODO: remove zip after creation
+    //TODO: remove zip after creation / change names of files
     public static Path createZip(String elementName, String shortPath) throws IOException {
         String parentRootPath = FileUtils.getParentRootPath(shortPath);
         String zipPath = String.join(FilenameConstant.SLASH, parentRootPath, elementName + UUID.randomUUID());
@@ -35,7 +35,7 @@ public final class ZipUtils {
                     if (p.toFile().isDirectory()) {
                         addFolderToZip(zs, p);
                     } else {
-                        addFileToZip(zs, sourcePath, p);
+                        addFileToZip(zs, p);
                     }
                 });
             }
@@ -52,8 +52,8 @@ public final class ZipUtils {
         }
     }
 
-    private static void addFileToZip(ZipOutputStream zs, Path sourcePath, Path p) {
-        ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(p).toString());
+    private static void addFileToZip(ZipOutputStream zs, Path p) {
+        ZipEntry zipEntry = new ZipEntry(FileUtils.decodeElementName(p.toFile().getName()));
         try {
             zs.putNextEntry(zipEntry);
             Files.copy(p, zs);
@@ -64,7 +64,7 @@ public final class ZipUtils {
     }
 
     private static void addFolderToZip(ZipOutputStream zs, Path p) {
-        ZipEntry zipEntry = new ZipEntry(p.toFile().getName() + FilenameConstant.SLASH);
+        ZipEntry zipEntry = new ZipEntry(FileUtils.decodeElementName(p.toFile().getName()) + FilenameConstant.SLASH);
         try {
             zs.putNextEntry(zipEntry);
             zs.closeEntry();
