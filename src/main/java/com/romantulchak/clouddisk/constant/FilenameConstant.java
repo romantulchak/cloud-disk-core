@@ -5,5 +5,6 @@ public interface FilenameConstant {
     String SLASH = "/";
     String DOT = ".";
     String FILE_NAME_SEPARATOR = "_-_-_";
+    String MINUS_SEPARATOR = "-";
 
 }

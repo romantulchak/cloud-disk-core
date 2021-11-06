@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Drive {
@@ -125,5 +126,18 @@ public class Drive {
     public Drive setTrash(Trash trash) {
         this.trash = trash;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Drive drive = (Drive) o;
+        return id == drive.id && Objects.equals(name, drive.name) && Objects.equals(owner, drive.owner) && Objects.equals(fullPath, drive.fullPath) && Objects.equals(shortPath, drive.shortPath);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, owner, fullPath, shortPath);
     }
 }

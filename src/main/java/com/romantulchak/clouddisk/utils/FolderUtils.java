@@ -12,9 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.Base64;
 import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;

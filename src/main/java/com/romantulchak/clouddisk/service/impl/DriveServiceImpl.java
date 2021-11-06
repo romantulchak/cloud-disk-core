@@ -1,6 +1,7 @@
 package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
+import com.romantulchak.clouddisk.constant.FilenameConstant;
 import com.romantulchak.clouddisk.dto.DriveDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.PlanWithTypeNotFoundException;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service
@@ -44,19 +46,23 @@ public class DriveServiceImpl implements DriveService {
     @Transactional
     @Override
     public void create(User user) {
-        String driveName = user.getUsername() + "-" + UUID.randomUUID().toString().replace("-", "");
-        Plan plan = planRepository.findPlanByName(PlanType.STANDARD).orElseThrow(() -> new PlanWithTypeNotFoundException(PlanType.STANDARD));
+        String driveName = user.getUsername() + FilenameConstant.MINUS_SEPARATOR + UUID.randomUUID()
+                .toString().replace(FilenameConstant.MINUS_SEPARATOR, "");
+        Plan plan = planRepository.findPlanByName(PlanType.STANDARD)
+                .orElseThrow(() -> new PlanWithTypeNotFoundException(PlanType.STANDARD));
+        LocalPath localPath = folderUtils.createDrive(driveName);
+        LocalDateTime createAt = LocalDateTime.now()
+                .withSecond(0)
+                .withNano(0);
         Drive drive = new Drive()
                 .setName(driveName)
                 .setOwner(user)
                 .setPlan(plan)
-                .setCreateAt(LocalDateTime.now());
-        LocalPath localPath = folderUtils.createDrive(driveName);
-        drive.setFullPath(localPath.getFullPath())
+                .setCreateAt(createAt)
+                .setFullPath(localPath.getFullPath())
                 .setShortPath((localPath.getShortPath()));
         driveRepository.save(drive);
         trashService.create(drive);
-
     }
 
     @Override
