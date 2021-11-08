@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -34,9 +33,6 @@ class DriveServiceImplTest {
 
     @Mock
     private Authentication authentication;
-
-    @Mock
-    private TrashServiceImpl trashService;
 
     @Mock
     private PlanRepository planRepository;
@@ -73,15 +69,10 @@ class DriveServiceImplTest {
         User user = new User();
         user.setUsername("Test");
         Optional<Plan> plan = Optional.of(new Plan(PlanType.STANDARD));
-        Drive drive = new Drive()
-                .setOwner(user)
-                .setShortPath(localPath.getShortPath())
-                .setFullPath(localPath.getFullPath())
-                .setPlan(plan.get());
         when(planRepository.findPlanByName(PlanType.STANDARD)).thenReturn(plan);
         when(folderUtils.createDrive(user.getUsername())).thenReturn(localPath);
         driveService.create(user);
-        verify(driveRepository, times(1)).save(Mockito.refEq(drive));
+        verify(driveRepository, times(1)).save(any());
     }
 
     @Test

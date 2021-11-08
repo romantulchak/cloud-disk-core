@@ -18,7 +18,6 @@ public class ElementController {
 
     private final ElementService elementService;
 
-    @Autowired
     public ElementController(ElementService elementSErvice) {
         this.elementService = elementSErvice;
     }

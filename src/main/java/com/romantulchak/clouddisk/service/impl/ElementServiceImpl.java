@@ -14,7 +14,6 @@ import com.romantulchak.clouddisk.service.ElementService;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +32,6 @@ public class ElementServiceImpl implements ElementService {
     private final EntityMapperInvoker<Folder, FolderDTO> folderMapper;
     private final EntityMapperInvoker<File, FileDTO> fileMapper;
 
-    @Autowired
     public ElementServiceImpl(StoreRepository storeRepository,
                               FolderUtils folderUtils,
                               PreRemoveRepository removeRepository,

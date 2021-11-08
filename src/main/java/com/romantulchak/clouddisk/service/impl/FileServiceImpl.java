@@ -7,12 +7,14 @@ import com.romantulchak.clouddisk.exception.FileNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
-import com.romantulchak.clouddisk.repository.*;
+import com.romantulchak.clouddisk.repository.DriveRepository;
+import com.romantulchak.clouddisk.repository.ElementAccessRepository;
+import com.romantulchak.clouddisk.repository.FileRepository;
+import com.romantulchak.clouddisk.repository.FolderRepository;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -39,7 +41,6 @@ public class FileServiceImpl implements FileService {
     private final ElementAccessRepository elementAccessRepository;
     private final EntityMapperInvoker<File, FileDTO> entityMapperInvoker;
 
-    @Autowired
     public FileServiceImpl(FileRepository fileRepository,
                            FolderRepository folderRepository,
                            FolderUtils folderUtils,

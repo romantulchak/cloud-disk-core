@@ -30,7 +30,6 @@ public class StarredServiceImpl implements StarredService {
     private final EntityMapperInvoker<Folder, FolderDTO> folderMapper;
 
 
-    @Autowired
     public StarredServiceImpl(StoreRepository storeRepository,
                               StarredRepository starredRepository,
                               EntityMapperInvoker<File, FileDTO> file,

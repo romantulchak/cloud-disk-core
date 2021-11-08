@@ -30,7 +30,6 @@ public class DriveServiceImpl implements DriveService {
     private final TrashService trashService;
     private final EntityMapperInvoker<Drive, DriveDTO> entityMapperInvoker;
 
-    @Autowired
     public DriveServiceImpl(DriveRepository driveRepository,
                             PlanRepository planRepository,
                             FolderUtils folderUtils,

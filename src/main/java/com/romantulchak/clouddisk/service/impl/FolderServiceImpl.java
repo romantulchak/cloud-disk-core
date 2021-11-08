@@ -4,7 +4,6 @@ import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.constant.FilenameConstant;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
-import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
@@ -16,7 +15,6 @@ import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
 import com.romantulchak.clouddisk.utils.ZipUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -42,7 +40,6 @@ public class FolderServiceImpl implements FolderService {
     private final ElementAccessRepository elementAccessRepository;
     private final EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker;
 
-    @Autowired
     public FolderServiceImpl(FolderRepository folderRepository,
                              DriveRepository driveRepository,
                              FileService fileService,
