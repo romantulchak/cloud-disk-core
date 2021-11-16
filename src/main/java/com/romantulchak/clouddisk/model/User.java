@@ -42,6 +42,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Starred> starreds;
 
+    @OneToMany(mappedBy = "user")
+    private List<History> histories;
+
     public User(){}
 
     public User(long id, String firstName, String lastName){
@@ -129,5 +132,13 @@ public class User {
 
     public void setStarreds(List<Starred> starreds) {
         this.starreds = starreds;
+    }
+
+    public List<History> getStatistics() {
+        return histories;
+    }
+
+    public void setStatistics(List<History> histories) {
+        this.histories = histories;
     }
 }

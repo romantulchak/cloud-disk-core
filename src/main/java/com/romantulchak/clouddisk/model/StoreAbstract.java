@@ -1,6 +1,5 @@
 package com.romantulchak.clouddisk.model;
 
-import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 
 import javax.persistence.*;
@@ -56,6 +55,9 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
 
     @OneToOne(mappedBy = "element", orphanRemoval = true)
     private ElementAccess access;
+
+    @OneToMany(mappedBy = "element")
+    private List<History> histories;
 
     public long getId() {
         return id;
@@ -189,6 +191,15 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
 
     public StoreAbstract setAccess(ElementAccess access) {
         this.access = access;
+        return this;
+    }
+
+    public List<History> getStatistics() {
+        return histories;
+    }
+
+    public StoreAbstract setStatistics(List<History> histories) {
+        this.histories = histories;
         return this;
     }
 

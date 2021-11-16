@@ -17,4 +17,5 @@ public interface ElementService {
 
     List<Store> findElementsForDrive(String driveName);
 
+    void renameElement(String name, UUID link);
 }

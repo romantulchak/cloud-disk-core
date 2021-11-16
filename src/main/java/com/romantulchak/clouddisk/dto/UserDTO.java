@@ -11,12 +11,12 @@ import java.util.Set;
 public class UserDTO {
     private long id;
 
-    @JsonView({View.FolderView.class,  View.FolderFileView.class})
-    @MapToDTO(mapClass = {View.FolderView.class, View.FolderFileView.class})
+    @JsonView({View.FolderView.class,  View.FolderFileView.class, View.HistoryView.class})
+    @MapToDTO(mapClass = {View.FolderView.class, View.FolderFileView.class, View.HistoryView.class})
     private String firstName;
 
-    @JsonView({View.FolderView.class, View.FolderFileView.class})
-    @MapToDTO(mapClass = {View.FolderView.class, View.FolderFileView.class})
+    @JsonView({View.FolderView.class, View.FolderFileView.class, View.HistoryView.class})
+    @MapToDTO(mapClass = {View.FolderView.class, View.FolderFileView.class, View.HistoryView.class})
     private String lastName;
 
     private String username;

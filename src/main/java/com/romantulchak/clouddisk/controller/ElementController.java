@@ -23,35 +23,41 @@ public class ElementController {
     }
 
     @PutMapping("/restore/{link}")
-    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication)")
-    public void restoreElement(@PathVariable("link")UUID link){
+    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication) OR @userElementAccess.hasEditAccess(#link, authentication)")
+    public void restoreElement(@PathVariable("link") UUID link) {
         elementService.restoreElement(link);
     }
 
 
     @PutMapping("/pre-remove/{link}")
-    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication)")
-    public void preRemoveElement(@PathVariable("link") UUID link, @RequestBody String driveName){
+    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication) OR @userElementAccess.hasEditAccess(#link, authentication)")
+    public void preRemoveElement(@PathVariable("link") UUID link, @RequestBody String driveName) {
         elementService.preRemoveElement(link, driveName);
     }
 
     @DeleteMapping("/remove/{link}")
-    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication)")
-    public void removeElement(@PathVariable("link") UUID link){
+    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication) OR @userElementAccess.hasEditAccess(#link, authentication)")
+    public void removeElement(@PathVariable("link") UUID link) {
         elementService.removeElement(link);
     }
 
     @GetMapping("/removed/{driveName}")
     @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
     @JsonView(View.FolderFileView.class)
-    public List<Store> getRemovedElements(@PathVariable("driveName") String driveName){
+    public List<Store> getRemovedElements(@PathVariable("driveName") String driveName) {
         return elementService.findRemovedElements(driveName);
     }
 
     @GetMapping("/{driveName}")
     @PreAuthorize("hasRole('USER') AND @userDriverAccess.checkAccess(#driveName, authentication)")
     @JsonView(View.FolderFileView.class)
-    public List<Store> findAllElementsForDrive(@PathVariable("driveName") String driveName){
+    public List<Store> findAllElementsForDrive(@PathVariable("driveName") String driveName) {
         return elementService.findElementsForDrive(driveName);
+    }
+
+    @PutMapping("/rename/{link}")
+    @PreAuthorize("hasRole('USER') AND @userElementAccess.hasFullAccess(#link, authentication) OR @userElementAccess.hasEditAccess(#link, authentication)")
+    public void renameElement(@RequestBody String name, @PathVariable("link") UUID link) {
+        elementService.renameElement(name, link);
     }
 }

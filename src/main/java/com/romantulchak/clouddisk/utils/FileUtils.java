@@ -30,66 +30,100 @@ public class FileUtils {
         return rootPath;
     }
 
-    public static ResponseEntity<Resource> getResource(Path path, String shortPath) throws IOException {
+    /**
+     * Gets Resource from path for downloading
+     *
+     * @param path path to file
+     * @return Resource from the file to download
+     * @throws IOException if file not found
+     */
+    public static ResponseEntity<Resource> getResource(Path path) throws IOException {
         Resource resource = new UrlResource(path.toUri());
         if (resource.exists() || resource.isReadable()) {
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         } else {
-            throw new FileNotFoundException(shortPath);
+            throw new FileNotFoundException(path.getFileName().toString());
         }
     }
 
-    public static String getMainFolderName(String name) {
-        int indexOfLastSlash = name.lastIndexOf(FilenameConstant.SLASH);
+    /**
+     * Gets main folder name from path
+     * Ex: /home/var/test/test.txt return home
+     *
+     * @param path to file
+     * @return main folder name from string
+     */
+    public static String getMainFolderName(String path) {
+        int indexOfLastSlash = path.lastIndexOf(FilenameConstant.SLASH);
         if (indexOfLastSlash != -1) {
-            String[] fileNameParts = name.substring(0, indexOfLastSlash).split(FilenameConstant.SLASH);
+            String[] fileNameParts = path.substring(0, indexOfLastSlash).split(FilenameConstant.SLASH);
             if (fileNameParts.length >= 3) {
-                name = name.substring(0, indexOfLastSlash);
-                return name.substring(0, name.lastIndexOf(FilenameConstant.SLASH));
+                path = path.substring(0, indexOfLastSlash);
+                return path.substring(0, path.lastIndexOf(FilenameConstant.SLASH));
             } else if (fileNameParts.length == 2) {
                 return fileNameParts[0];
             }
         }
-        return name;
+        return path;
     }
 
-    public static String getParentFolderName(String name) {
-        int indexOfLastSlash = name.lastIndexOf(FilenameConstant.SLASH);
+    /**
+     * Gets parent folder path from path
+     * Ex: /home/var/test/test.txt return /home/var/test
+     *
+     * @param path to file
+     * @return parent folder path
+     */
+    public static String getParentFolderPath(String path) {
+        int indexOfLastSlash = path.lastIndexOf(FilenameConstant.SLASH);
         if (indexOfLastSlash != -1) {
-            String[] fileNameParts = name.substring(0, indexOfLastSlash).split(FilenameConstant.SLASH);
+            String[] fileNameParts = path.substring(0, indexOfLastSlash).split(FilenameConstant.SLASH);
             if (fileNameParts.length >= 3) {
                 return fileNameParts[fileNameParts.length - 2];
             } else if (fileNameParts.length == 2) {
                 return fileNameParts[0];
             }
         }
-        return name;
+        return path;
     }
 
-    public static String getFolderPath(String name) {
-        int indexOfLastSlash = name.lastIndexOf(FilenameConstant.SLASH);
+    /**
+     * Gets folder path without filename
+     *
+     * @param path which contains filename
+     * @return path to folder without filename
+     */
+    public static String getFolderPath(String path) {
+        int indexOfLastSlash = path.lastIndexOf(FilenameConstant.SLASH);
         if (indexOfLastSlash != -1) {
-            return name.substring(0, indexOfLastSlash);
+            return path.substring(0, indexOfLastSlash);
         }
-        return name;
+        return path;
     }
 
-    public static String getFileName(MultipartFile file) {
-        String fileName = Objects.requireNonNull(file.getOriginalFilename());
-        int indexOfLastSlash = fileName.lastIndexOf(FilenameConstant.SLASH);
-        return Objects.requireNonNull(file.getOriginalFilename()).substring(indexOfLastSlash + 1);
-    }
-
-    public static String getFileExtension(String name) {
-        String extension = StringUtils.getFilenameExtension(name);
+    /**
+     * Gets file extension
+     *
+     * @param filename name of file
+     * @return extension of file
+     */
+    public static String getFileExtension(String filename) {
+        String extension = StringUtils.getFilenameExtension(filename);
         if (extension == null) {
             return "";
         }
         return FilenameConstant.DOT + extension;
     }
 
+    /**
+     * Gets filename from path
+     * Ex: /home/var/test/test.txt return test.txt
+     *
+     * @param name to get original filename
+     * @return filename from path
+     */
     public static String getName(String name) {
         int indexOfLastSlash = name.lastIndexOf(FilenameConstant.SLASH);
         if (indexOfLastSlash != -1) {
@@ -98,11 +132,24 @@ public class FileUtils {
         return name;
     }
 
+    /**
+     * Encodes file/folder name to Base64
+     *
+     * @param name of file/folder
+     * @return encoded file/folder name
+     */
     public static String encodeElementName(String name) {
         name = FileUtils.getName(name);
-        return Base64.getEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)) + FilenameConstant.FILE_NAME_SEPARATOR;
+        return Base64.getEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)).replace("/", "")
+                + FilenameConstant.FILE_NAME_SEPARATOR;
     }
 
+    /**
+     * Decodes file/folder name to original name
+     *
+     * @param encodedName of file/folder
+     * @return original name of encoded string
+     */
     public static String decodeElementName(String encodedName) {
         int indexOfSeparator = encodedName.indexOf(FilenameConstant.FILE_NAME_SEPARATOR);
         encodedName = encodedName.substring(0, indexOfSeparator);

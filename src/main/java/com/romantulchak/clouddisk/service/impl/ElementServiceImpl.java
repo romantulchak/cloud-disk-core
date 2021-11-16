@@ -4,13 +4,17 @@ import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
+import com.romantulchak.clouddisk.exception.ElementNameException;
+import com.romantulchak.clouddisk.exception.ElementNotFoundException;
 import com.romantulchak.clouddisk.exception.FileNotFoundException;
 import com.romantulchak.clouddisk.exception.ObjectAlreadyPreRemovedException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
+import com.romantulchak.clouddisk.model.enums.HistoryType;
 import com.romantulchak.clouddisk.repository.PreRemoveRepository;
 import com.romantulchak.clouddisk.repository.StoreRepository;
 import com.romantulchak.clouddisk.service.ElementService;
+import com.romantulchak.clouddisk.service.HistoryService;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
@@ -29,6 +33,7 @@ public class ElementServiceImpl implements ElementService {
     private final FolderUtils folderUtils;
     private final PreRemoveRepository removeRepository;
     private final TrashService trashService;
+    private final HistoryService historyService;
     private final EntityMapperInvoker<Folder, FolderDTO> folderMapper;
     private final EntityMapperInvoker<File, FileDTO> fileMapper;
 
@@ -36,6 +41,7 @@ public class ElementServiceImpl implements ElementService {
                               FolderUtils folderUtils,
                               PreRemoveRepository removeRepository,
                               TrashService trashService,
+                              HistoryService historyService,
                               EntityMapperInvoker<Folder, FolderDTO> folderMapper,
                               EntityMapperInvoker<File, FileDTO> fileMapper) {
         this.storeRepository = storeRepository;
@@ -44,6 +50,7 @@ public class ElementServiceImpl implements ElementService {
         this.trashService = trashService;
         this.folderMapper = folderMapper;
         this.fileMapper = fileMapper;
+        this.historyService = historyService;
     }
 
     @Transactional
@@ -64,6 +71,7 @@ public class ElementServiceImpl implements ElementService {
             removeRepository.deleteByElementId(element.getId());
             if (isMoved) {
                 storeRepository.save(element);
+                historyService.create(element, HistoryType.RESTORE);
             }
         }
     }
@@ -77,6 +85,7 @@ public class ElementServiceImpl implements ElementService {
             Trash trash = trashService.getTrashByDriveName(driveName);
             LocalPath path = StoreUtils.preRemoveElement(element, folderUtils, trash);
             storeRepository.save(element);
+            historyService.create(element, HistoryType.RESTORE);
             createPreRemove(element, path.getShortPath());
         } else {
             throw new ObjectAlreadyPreRemovedException(element.getName());
@@ -113,6 +122,17 @@ public class ElementServiceImpl implements ElementService {
                 .sorted()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void renameElement(String name, UUID link) {
+        StoreAbstract element = storeRepository.findByLink(link)
+                .orElseThrow(() -> new ElementNotFoundException(link));
+        if (element.getName().equals(name)) {
+            throw new ElementNameException(name);
+        }
+        element.setName(name);
+        storeRepository.save(element);
     }
 
     private void createPreRemove(StoreAbstract element, String pathInTrash) {

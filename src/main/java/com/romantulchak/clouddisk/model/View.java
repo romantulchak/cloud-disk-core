@@ -6,4 +6,5 @@ public class View {
     public interface FileView { }
     public interface FolderFileView { }
     public interface ElementAccessView { }
+    public interface HistoryView { }
 }

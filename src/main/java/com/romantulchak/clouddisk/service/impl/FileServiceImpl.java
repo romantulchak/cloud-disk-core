@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -55,7 +57,6 @@ public class FileServiceImpl implements FileService {
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
-
     @Override
     public List<FileDTO> findFilesInFolder(UUID folderLink) {
         return fileRepository.findAllByFolderLinkAndRemoveType(folderLink, RemoveType.SAVED)
@@ -77,7 +78,7 @@ public class FileServiceImpl implements FileService {
     public CompletableFuture<FileDTO> uploadFileIntoFolder(MultipartFile multipartFile, UUID folderLink, Authentication authentication) {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow((() -> new FolderNotFoundException(folderLink)));
         File file = getFile(multipartFile, multipartFile.getOriginalFilename(), folder.getOwner(), folder);
-        if (folder.getAccess() != null){
+        if (folder.getAccess() != null) {
             ElementAccess elementAccess = new ElementAccess()
                     .setElement(file)
                     .setAccessType(folder.getAccess().getAccessType().name());
@@ -114,6 +115,10 @@ public class FileServiceImpl implements FileService {
         return CompletableFuture.completedFuture(convertToDTO(file, View.FolderFileView.class));
     }
 
+    public void test(String ...a){
+
+    }
+
     @Override
     public File getFile(MultipartFile multipartFile, User user, Drive drive, LocalPath path) {
         return new File()
@@ -131,7 +136,7 @@ public class FileServiceImpl implements FileService {
     public ResponseEntity<Resource> downloadFile(UUID link) throws IOException {
         File file = fileRepository.findFileByLink(link).orElseThrow(() -> new FileNotFoundException(link));
         Path path = Paths.get(file.getPath().getShortPath());
-        return FileUtils.getResource(path, file.getPath().getShortPath());
+        return FileUtils.getResource(path);
     }
 
     private FileDTO convertToDTO(File file, Class<?> classToCheck) {

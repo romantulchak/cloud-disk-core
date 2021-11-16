@@ -17,16 +17,16 @@ public class StoreAbstractDTO implements Store {
     @JsonView({View.FolderFileView.class, View.FolderView.class})
     private long id;
 
-    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
-    @JsonView({View.FolderFileView.class, View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
     private String name;
 
     @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
     @JsonView({View.FolderFileView.class, View.FolderView.class})
     private LocalDateTime createAt;
 
-    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
-    @JsonView({View.FolderFileView.class, View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
     private UUID link;
 
     @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})

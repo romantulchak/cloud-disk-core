@@ -130,7 +130,7 @@ public class FolderServiceImpl implements FolderService {
         Folder folder = folderRepository.findFolderByLink(folderLink)
                 .orElseThrow(() -> new FolderNotFoundException(folderLink));
         Path path = ZipUtils.createZip(folder.getName(), folder.getPath().getShortPath());
-        return FileUtils.getResource(path, folder.getPath().getShortPath());
+        return FileUtils.getResource(path);
     }
 
     @Override
@@ -180,7 +180,7 @@ public class FolderServiceImpl implements FolderService {
             String mainFolderIdentifier = sb.toString().replaceAll(FilenameConstant.LAST_SLASH_REGEX, "");
             String mainFolderName = FileUtils.getMainFolderName(sb.toString());
             if (folders.stream().noneMatch(e -> e.getName().equals(value) && e.getMainFolderIdentifier().equals(mainFolderIdentifier))) {
-                String parentFolderName = FileUtils.getParentFolderName(sb.toString());
+                String parentFolderName = FileUtils.getParentFolderPath(sb.toString());
                 Optional<Folder> mainFolder = folders.stream().filter(f -> f.getName().equals(parentFolderName) &&
                         f.getMainFolderIdentifier().equals(mainFolderName)).findFirst();
                 if (mainFolder.isPresent()) {
@@ -208,7 +208,7 @@ public class FolderServiceImpl implements FolderService {
                 subFolder = checkIfMainFolderExists(mainFolderPath, path, folders, owner);
                 createdFolders.add(mainFolderPath);
             }
-            fileService.getFile(file, FileUtils.getFileName(file), owner, subFolder);
+            fileService.getFile(file, FileUtils.getName(file.getOriginalFilename()), owner, subFolder);
         }
         return folders;
     }

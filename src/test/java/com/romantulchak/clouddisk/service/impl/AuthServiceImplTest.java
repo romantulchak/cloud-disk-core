@@ -55,8 +55,6 @@ class AuthServiceImplTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
-    private String testJwt = "jwt";
-
     @Test
     void authenticateUser() {
         LoginRequest loginRequest = new LoginRequest("Test", "test");
@@ -65,6 +63,7 @@ class AuthServiceImplTest {
         Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
         Mockito.when(authenticationManager.authenticate(userAuthentication))
                 .thenReturn(authentication);
+        String testJwt = "jwt";
         Mockito.when(jwtUtils.generateJwtToken(authentication)).thenReturn(testJwt);
         JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
         assertNotNull(jwtResponse);
