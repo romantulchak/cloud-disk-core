@@ -1,15 +1,19 @@
-package com.romantulchak.clouddisk.model;
+package com.romantulchak.clouddisk.model.history;
 
+import com.romantulchak.clouddisk.model.StoreAbstract;
+import com.romantulchak.clouddisk.model.User;
 import com.romantulchak.clouddisk.model.enums.HistoryType;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@DiscriminatorColumn(name = "history_type")
 public class History {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     @ManyToOne

@@ -7,10 +7,12 @@ import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
+import com.romantulchak.clouddisk.model.enums.HistoryType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.*;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
+import com.romantulchak.clouddisk.service.HistoryService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
@@ -39,22 +41,25 @@ public class FolderServiceImpl implements FolderService {
     private final FolderUtils folderUtils;
     private final ElementAccessRepository elementAccessRepository;
     private final EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker;
+    private final HistoryService historyService;
 
     public FolderServiceImpl(FolderRepository folderRepository,
                              DriveRepository driveRepository,
                              FileService fileService,
                              FolderUtils folderUtils,
+                             HistoryService historyService,
                              ElementAccessRepository elementAccessRepository,
                              EntityMapperInvoker<Folder, FolderDTO> entityMapperInvoker) {
         this.folderRepository = folderRepository;
         this.driveRepository = driveRepository;
         this.fileService = fileService;
         this.folderUtils = folderUtils;
+        this.historyService = historyService;
         this.entityMapperInvoker = entityMapperInvoker;
         this.elementAccessRepository = elementAccessRepository;
     }
 
-    //TODO: add check if folder named doesn't exist
+    @Transactional
     @Override
     public FolderDTO create(String folderName, String driveName, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -64,6 +69,7 @@ public class FolderServiceImpl implements FolderService {
         Folder folder = getFolder(folderName, user, drive.getShortPath())
                 .setDrive(drive);
         folder = folderRepository.save(folder);
+        historyService.create(folder, HistoryType.CREATE);
         return convertToDTO(folder, View.FolderView.class);
     }
 
@@ -74,14 +80,14 @@ public class FolderServiceImpl implements FolderService {
     }
 
     private Folder getFolder(String folderName, User user, String shortPath) {
+        UUID link = UUID.randomUUID();
         Folder folder = new Folder()
                 .setName(folderName)
                 .setOwner(user)
-                .setLink(UUID.randomUUID())
+                .setLink(link)
                 .setCreateAt(LocalDateTime.now())
-                .setUploadAt(LocalDateTime.now())
-                .setSubFolders(new ArrayList<>());
-        LocalPath path = folderUtils.createFolder(shortPath, folderName);
+                .setUploadAt(LocalDateTime.now());
+        LocalPath path = folderUtils.createFolderWithEncodedName(shortPath, folderName);
         folder.setPath(path);
         return folder;
     }
@@ -98,7 +104,8 @@ public class FolderServiceImpl implements FolderService {
     public FolderDTO createSubFolder(String folderName, UUID folderLink, Authentication authentication) {
         Folder mainFolder = folderRepository.findFolderByLink(folderLink)
                 .orElseThrow(() -> new FolderNotFoundException(folderLink));
-        Folder subFolder = getSubFolder(folderName, authentication, mainFolder.getPath().getShortPath());
+        Folder subFolder = getSubFolder(folderName, authentication, mainFolder.getPath().getShortPath())
+                .setRootFolder(mainFolder.getLink());
         subFolder = folderRepository.save(subFolder);
         if (mainFolder.getAccess() != null) {
             ElementAccess elementAccess = new ElementAccess()
@@ -107,13 +114,12 @@ public class FolderServiceImpl implements FolderService {
             subFolder.setAccess(elementAccess);
             elementAccessRepository.save(elementAccess);
         }
-        mainFolder.getSubFolders().add(subFolder);
         return convertToDTO(subFolder, View.FolderView.class);
     }
 
     @Override
     public List<Store> findSubFoldersInFolder(UUID folderLink) {
-        List<FolderDTO> subFolders = folderRepository.findSubFolders(folderLink, RemoveType.SAVED.name())
+        List<FolderDTO> subFolders = folderRepository.findFoldersByRootFolderAndRemoveType(folderLink, RemoveType.SAVED)
                 .stream()
                 .sorted()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
@@ -164,7 +170,7 @@ public class FolderServiceImpl implements FolderService {
         Folder folder = folderRepository.findFolderByLink(link).orElseThrow(() -> new FolderNotFoundException(link));
         List<Folder> folders = uploadFolder(files, folder.getOwner(), folder.getPath().getShortPath());
         Folder subFolder = folders.get(0);
-        folder.getSubFolders().add(subFolder);
+        subFolder.setRootFolder(link);
         folders.add(folder);
         folderRepository.saveAll(folders);
         return CompletableFuture.completedFuture(convertToDTO(subFolder, View.FolderFileView.class));
@@ -189,7 +195,7 @@ public class FolderServiceImpl implements FolderService {
                 folder = getFolder(value, user, pathToFile)
                         .setMainFolderIdentifier(mainFolderIdentifier);
                 if (mainFolder.isPresent()) {
-                    mainFolder.get().getSubFolders().add(folder);
+                    folder.setRootFolder(mainFolder.get().getLink());
                 }
                 folders.add(folder);
             }

@@ -3,7 +3,6 @@ package com.romantulchak.clouddisk.model;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

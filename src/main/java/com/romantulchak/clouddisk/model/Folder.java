@@ -10,15 +10,9 @@ import java.util.UUID;
 
 @Entity
 @DiscriminatorValue(value = "Folder")
-@NamedEntityGraph(name = "Folder.subFolderFiles",
-attributeNodes = {
-        @NamedAttributeNode("subFolders"),
-})
 public class Folder extends StoreAbstract{
 
-    @OneToMany(orphanRemoval = true)
-    @JoinTable(name = "folder_sub_folders")
-    private List<Folder> subFolders;
+    private UUID rootFolder;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "folder", orphanRemoval = true)
     private List<File> files;
@@ -32,12 +26,12 @@ public class Folder extends StoreAbstract{
         this.color = FolderColorType.MOUSE.getColor();
     }
 
-    public List<Folder> getSubFolders() {
-        return subFolders;
+    public UUID getRootFolder() {
+        return rootFolder;
     }
 
-    public Folder setSubFolders(List<Folder> subFolders) {
-        this.subFolders = subFolders;
+    public Folder setRootFolder(UUID rootFolder) {
+        this.rootFolder = rootFolder;
         return this;
     }
 

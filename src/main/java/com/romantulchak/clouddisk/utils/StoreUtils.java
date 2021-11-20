@@ -21,15 +21,18 @@ public class StoreUtils {
 
     public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash) {
         LocalPath path = folderUtils.moveFileToTrash(element.getPath().getShortPath(), trash.getPath(), FileUtils.getName(element.getPath().getShortPath()));
-        LocalPath newPath = new LocalPath()
-                .setOldFullPath(element.getPath().getFullPath())
-                .setOldShortPath(element.getPath().getShortPath())
-                .setShortPath(path.getShortPath())
-                .setFullPath(path.getFullPath());
-        element.setRemoveType(RemoveType.PRE_REMOVED)
-                .setTrash(trash)
-                .setPath(newPath);
-        return path;
+        if (path != null){
+            LocalPath newPath = new LocalPath()
+                    .setOldFullPath(element.getPath().getFullPath())
+                    .setOldShortPath(element.getPath().getShortPath())
+                    .setShortPath(path.getShortPath())
+                    .setFullPath(path.getFullPath());
+            element.setRemoveType(RemoveType.PRE_REMOVED)
+                    .setTrash(trash)
+                    .setPath(newPath);
+            return path;
+        }
+        return null;
     }
 
     public static void setContext(StoreAbstract store, StoreAbstractDTO storeDTO) {

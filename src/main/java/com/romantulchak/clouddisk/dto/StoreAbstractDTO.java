@@ -21,6 +21,10 @@ public class StoreAbstractDTO implements Store {
     @JsonView({View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
     private String name;
 
+    @MapToDTO(mapClass = {View.HistoryView.class})
+    @JsonView({View.HistoryView.class})
+    private String oldName;
+
     @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
     @JsonView({View.FolderFileView.class, View.FolderView.class})
     private LocalDateTime createAt;
@@ -33,8 +37,8 @@ public class StoreAbstractDTO implements Store {
     @JsonView({View.FolderFileView.class, View.FolderView.class})
     private UserDTO owner;
 
-    @JsonView({View.FolderFileView.class,View.FolderView.class, View.FolderView.class})
-    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class})
+    @JsonView({View.FolderFileView.class,View.FolderView.class, View.FolderView.class, View.HistoryView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class, View.HistoryView.class})
     private ContextType context;
 
     @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
@@ -49,8 +53,12 @@ public class StoreAbstractDTO implements Store {
     @JsonView({View.FolderFileView.class, View.FolderView.class})
     private ElementAccessDTO access;
 
-    @JsonView({View.FolderFileView.class, View.FolderView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
     private boolean isOwner;
+
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
+    private boolean hasLinkAccess;
 
     public long getId() {
         return id;
@@ -131,6 +139,24 @@ public class StoreAbstractDTO implements Store {
 
     public StoreAbstractDTO setOwner(boolean owner) {
         isOwner = owner;
+        return this;
+    }
+
+    public String getOldName() {
+        return oldName;
+    }
+
+    public StoreAbstractDTO setOldName(String oldName) {
+        this.oldName = oldName;
+        return this;
+    }
+
+    public boolean isHasLinkAccess() {
+        return hasLinkAccess;
+    }
+
+    public StoreAbstractDTO setHasLinkAccess(boolean hasLinkAccess) {
+        this.hasLinkAccess = hasLinkAccess;
         return this;
     }
 }

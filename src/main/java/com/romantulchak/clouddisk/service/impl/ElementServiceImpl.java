@@ -84,9 +84,13 @@ public class ElementServiceImpl implements ElementService {
         if (element.getRemoveType() != RemoveType.PRE_REMOVED) {
             Trash trash = trashService.getTrashByDriveName(driveName);
             LocalPath path = StoreUtils.preRemoveElement(element, folderUtils, trash);
-            storeRepository.save(element);
-            historyService.create(element, HistoryType.RESTORE);
-            createPreRemove(element, path.getShortPath());
+            if (path == null){
+                removeElement(elementLink);
+            }else{
+                storeRepository.save(element);
+                historyService.create(element, HistoryType.PRE_REMOVE);
+                createPreRemove(element, path.getShortPath());
+            }
         } else {
             throw new ObjectAlreadyPreRemovedException(element.getName());
         }
@@ -124,6 +128,7 @@ public class ElementServiceImpl implements ElementService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public void renameElement(String name, UUID link) {
         StoreAbstract element = storeRepository.findByLink(link)
@@ -131,8 +136,10 @@ public class ElementServiceImpl implements ElementService {
         if (element.getName().equals(name)) {
             throw new ElementNameException(name);
         }
-        element.setName(name);
+        element.setOldName(element.getName())
+                .setName(name);
         storeRepository.save(element);
+        historyService.createRenameHistory(element, name);
     }
 
     private void createPreRemove(StoreAbstract element, String pathInTrash) {

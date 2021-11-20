@@ -1,5 +1,7 @@
 package com.romantulchak.clouddisk.model;
 
+import com.romantulchak.clouddisk.model.history.History;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;

@@ -2,13 +2,16 @@ package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
 import com.romantulchak.clouddisk.dto.HistoryDTO;
-import com.romantulchak.clouddisk.model.History;
+import com.romantulchak.clouddisk.dto.RenameHistoryDTO;
+import com.romantulchak.clouddisk.model.history.History;
 import com.romantulchak.clouddisk.model.StoreAbstract;
 import com.romantulchak.clouddisk.model.User;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.model.enums.HistoryType;
+import com.romantulchak.clouddisk.model.history.RenameHistory;
 import com.romantulchak.clouddisk.repository.HistoryRepository;
 import com.romantulchak.clouddisk.service.HistoryService;
+import com.romantulchak.clouddisk.utils.StoreUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,25 +33,45 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Override
     public History create(StoreAbstract element, HistoryType type) {
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-        UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-        User user = new User()
-                .setId(principal.getId());
+        User user = getAuthenticatedUser();
         History history = new History(element, type, user);
         return historyRepository.save(history);
     }
 
     @Override
+    public History createRenameHistory(StoreAbstract element, String name) {
+        User user = getAuthenticatedUser();
+        History history = new RenameHistory(element, user, name);
+        return historyRepository.save(history);
+    }
+
+    @Override
     public List<HistoryDTO> findHistoryForElement(long id) {
-        return historyRepository.findAllByElementId(id)
+        return historyRepository.findAllByElementIdOrderByDateDesc(id)
                 .stream()
                 .map(history -> convertToDTO(history, View.HistoryView.class))
                 .collect(Collectors.toList());
     }
 
+    private User getAuthenticatedUser(){
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+        UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
+        return new User()
+                .setId(principal.getId());
+    }
+
     private HistoryDTO convertToDTO(History history, Class<?> classToCheck){
-        return entityMapperInvoker.entityToDTO(history, HistoryDTO.class, classToCheck);
+        HistoryDTO historyDTO;
+        if (history instanceof RenameHistory){
+            historyDTO = entityMapperInvoker.entityToDTO(history, RenameHistoryDTO.class, classToCheck);
+        }else{
+            historyDTO = entityMapperInvoker.entityToDTO(history, HistoryDTO.class, classToCheck);
+        }
+        historyDTO.getElement()
+                .setOwner(StoreUtils.isOwner(history.getElement()));
+        StoreUtils.setContext(history.getElement(), historyDTO.getElement());
+        return historyDTO;
     }
 }

@@ -55,7 +55,7 @@ public class FolderUtils {
     }
 
 
-    public LocalPath createFolder(String shortPath, String realFolderName) {
+    public LocalPath createFolderWithEncodedName(String shortPath, String realFolderName) {
         String folderName = FileUtils.encodeElementName(realFolderName) + UUID.randomUUID();
         try {
             String folderPath = String.join(FilenameConstant.SLASH, shortPath, folderName);
@@ -130,7 +130,11 @@ public class FolderUtils {
             Path shortFilePath = Paths.get(filePath);
             Files.move(shortFilePath, shortTrashPath, StandardCopyOption.REPLACE_EXISTING);
             return new LocalPath(getFullPath(getFileRelativePath(localPath)), localPath);
-        } catch (IllegalStateException | IOException e) {
+        }catch (NoSuchFileException e){
+            LOGGER.debug(String.format("File %s already removed", filePath));
+            return null;
+        }
+        catch (IllegalStateException | IOException e) {
             LOGGER.error(e.getMessage());
             throw new FileAlreadyMovedException(filename);
         }

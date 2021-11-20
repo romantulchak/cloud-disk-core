@@ -1,6 +1,7 @@
 package com.romantulchak.clouddisk.model;
 
 import com.romantulchak.clouddisk.model.enums.RemoveType;
+import com.romantulchak.clouddisk.model.history.History;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -26,6 +27,9 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
     private LocalDateTime createAt;
 
     private LocalDateTime uploadAt;
+
+    @Size(max = 195)
+    private String oldName;
 
     @NotNull
     @ManyToOne
@@ -200,6 +204,15 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
 
     public StoreAbstract setStatistics(List<History> histories) {
         this.histories = histories;
+        return this;
+    }
+
+    public String getOldName() {
+        return oldName;
+    }
+
+    public StoreAbstract setOldName(String oldName) {
+        this.oldName = oldName;
         return this;
     }
 

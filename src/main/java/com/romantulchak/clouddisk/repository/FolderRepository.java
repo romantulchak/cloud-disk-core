@@ -19,13 +19,7 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
 
     Optional<Folder> findFolderByLink(UUID link);
 
-    //TODO: optimize query
-    @Query(value = "SELECT DISTINCT id, create_at, has_link_access, link, name, upload_at, drive_id, owner_id, full_path, " +
-            "short_path, remove_type, trash_id, old_full_path, color, old_short_path" +
-            " FROM folder f LEFT JOIN folder_sub_folders fsf on f.id = fsf.folder_id " +
-            "WHERE f.id IN (SELECT fsf1.sub_folders_id FROM folder_sub_folders fsf1 " +
-            "LEFT JOIN folder f2 on fsf1.folder_id = f2.id WHERE f2.link = :link) AND f.remove_type = :removeType", nativeQuery = true)
-    List<Folder> findSubFolders(@Param("link") UUID folderLink, @Param("removeType") String removeType);
+    List<Folder> findFoldersByRootFolderAndRemoveType(UUID link, RemoveType removeType);
 
     boolean existsByLinkAndOwnerId(UUID folderLink, long userId);
 

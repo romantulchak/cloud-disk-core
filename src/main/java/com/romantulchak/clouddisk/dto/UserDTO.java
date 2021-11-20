@@ -9,9 +9,12 @@ import java.util.Set;
 
 @DTO
 public class UserDTO {
+
+    @JsonView(View.HistoryView.class)
+    @MapToDTO(mapClass = {View.HistoryView.class})
     private long id;
 
-    @JsonView({View.FolderView.class,  View.FolderFileView.class, View.HistoryView.class})
+    @JsonView({View.FolderView.class, View.FolderFileView.class, View.HistoryView.class})
     @MapToDTO(mapClass = {View.FolderView.class, View.FolderFileView.class, View.HistoryView.class})
     private String firstName;
 

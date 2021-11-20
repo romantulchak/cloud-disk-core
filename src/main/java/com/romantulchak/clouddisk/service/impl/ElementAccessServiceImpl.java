@@ -5,6 +5,7 @@ import com.romantulchak.clouddisk.dto.ElementAccessDTO;
 import com.romantulchak.clouddisk.dto.StoreAccessDTO;
 import com.romantulchak.clouddisk.exception.ElementNotFoundException;
 import com.romantulchak.clouddisk.model.*;
+import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.model.enums.StoreAccessType;
 import com.romantulchak.clouddisk.repository.ElementAccessRepository;
 import com.romantulchak.clouddisk.repository.FileRepository;
@@ -101,7 +102,7 @@ public class ElementAccessServiceImpl implements ElementAccessService {
     }
 
     private void closeAccessForSubElements(UUID link) {
-        List<Folder> subFolders = folderRepository.findByLink(link).getSubFolders();
+        List<Folder> subFolders = folderRepository.findFoldersByRootFolderAndRemoveType(link, RemoveType.SAVED);
         List<File> files = fileRepository.findAllByFolderLink(link);
         for (File file : files) {
             elementAccessRepository.deleteByElementId(file.getId());
@@ -115,8 +116,7 @@ public class ElementAccessServiceImpl implements ElementAccessService {
     }
 
     private void setAccessToSubElements(Folder subFolder, String type) {
-        List<Folder> subFolders = folderRepository.findByLink(subFolder.getLink())
-                .getSubFolders();
+        List<Folder> subFolders = folderRepository.findFoldersByRootFolderAndRemoveType(subFolder.getLink(), RemoveType.SAVED);
         List<File> files = fileRepository.findAllByFolderLink(subFolder.getLink());
         for (File file : files) {
             openAccessToElement(file);
