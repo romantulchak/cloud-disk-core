@@ -21,7 +21,7 @@ public class StoreUtils {
 
     public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash) {
         LocalPath path = folderUtils.moveFileToTrash(element.getPath().getShortPath(), trash.getPath(), FileUtils.getName(element.getPath().getShortPath()));
-        if (path != null){
+        if (path != null) {
             LocalPath newPath = new LocalPath()
                     .setOldFullPath(element.getPath().getFullPath())
                     .setOldShortPath(element.getPath().getShortPath())
@@ -43,6 +43,14 @@ public class StoreUtils {
             context = ContextType.FOLDER;
         }
         storeDTO.setContext(context);
+    }
+
+    public static ContextType getContext(StoreAbstract element) {
+        if (element.getClass().isAssignableFrom(File.class)) {
+            return ContextType.FILE;
+        } else {
+            return ContextType.FOLDER;
+        }
     }
 
     public static boolean isStarred(StoreAbstract element) {

@@ -6,12 +6,14 @@ import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FileNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
+import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.ElementAccessRepository;
 import com.romantulchak.clouddisk.repository.FileRepository;
 import com.romantulchak.clouddisk.repository.FolderRepository;
 import com.romantulchak.clouddisk.service.FileService;
+import com.romantulchak.clouddisk.service.HistoryService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
@@ -20,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -41,12 +44,14 @@ public class FileServiceImpl implements FileService {
     private final FolderUtils folderUtils;
     private final DriveRepository driveRepository;
     private final ElementAccessRepository elementAccessRepository;
+    private final HistoryService historyService;
     private final EntityMapperInvoker<File, FileDTO> entityMapperInvoker;
 
     public FileServiceImpl(FileRepository fileRepository,
                            FolderRepository folderRepository,
                            FolderUtils folderUtils,
                            DriveRepository driveRepository,
+                           HistoryService historyService,
                            ElementAccessRepository elementAccessRepository,
                            EntityMapperInvoker<File, FileDTO> entityMapperInvoker) {
         this.fileRepository = fileRepository;
@@ -54,6 +59,7 @@ public class FileServiceImpl implements FileService {
         this.folderUtils = folderUtils;
         this.driveRepository = driveRepository;
         this.elementAccessRepository = elementAccessRepository;
+        this.historyService = historyService;
         this.entityMapperInvoker = entityMapperInvoker;
     }
 
@@ -73,11 +79,14 @@ public class FileServiceImpl implements FileService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Async
     @Override
     public CompletableFuture<FileDTO> uploadFileIntoFolder(MultipartFile multipartFile, UUID folderLink, Authentication authentication) {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow((() -> new FolderNotFoundException(folderLink)));
         File file = getFile(multipartFile, multipartFile.getOriginalFilename(), folder.getOwner(), folder);
+        ContextType context = StoreUtils.getContext(file);
+        historyService.createUploadHistory(folder, file.getName(), file.getLink(), file.getPath().getFullPath(), context, authentication);
         if (folder.getAccess() != null) {
             ElementAccess elementAccess = new ElementAccess()
                     .setElement(file)
@@ -113,10 +122,6 @@ public class FileServiceImpl implements FileService {
         File file = getFile(multipartFile, drive.getOwner(), drive, path);
         fileRepository.save(file);
         return CompletableFuture.completedFuture(convertToDTO(file, View.FolderFileView.class));
-    }
-
-    public void test(String ...a){
-
     }
 
     @Override

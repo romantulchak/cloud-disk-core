@@ -21,8 +21,6 @@ public class StoreAbstractDTO implements Store {
     @JsonView({View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
     private String name;
 
-    @MapToDTO(mapClass = {View.HistoryView.class})
-    @JsonView({View.HistoryView.class})
     private String oldName;
 
     @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
@@ -41,8 +39,8 @@ public class StoreAbstractDTO implements Store {
     @MapToDTO(mapClass = {View.FolderFileView.class,View.FolderView.class, View.HistoryView.class})
     private ContextType context;
 
-    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
-    @JsonView({View.FolderFileView.class, View.FolderView.class})
+    @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
+    @JsonView({View.FolderFileView.class, View.FolderView.class, View.HistoryView.class})
     private LocalPathDTO path;
 
     @MapToDTO(mapClass = {View.FolderFileView.class, View.FolderView.class})
@@ -72,8 +70,9 @@ public class StoreAbstractDTO implements Store {
         return name;
     }
 
-    public void setName(String name) {
+    public StoreAbstractDTO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public LocalDateTime getCreateAt() {
@@ -88,8 +87,9 @@ public class StoreAbstractDTO implements Store {
         return link;
     }
 
-    public void setLink(UUID link) {
+    public StoreAbstractDTO setLink(UUID link) {
         this.link = link;
+        return this;
     }
 
     public UserDTO getOwner() {
@@ -104,16 +104,18 @@ public class StoreAbstractDTO implements Store {
         return context;
     }
 
-    public void setContext(ContextType context) {
+    public StoreAbstractDTO setContext(ContextType context) {
         this.context = context;
+        return this;
     }
 
     public LocalPathDTO getPath() {
         return path;
     }
 
-    public void setPath(LocalPathDTO path) {
+    public StoreAbstractDTO setPath(LocalPathDTO path) {
         this.path = path;
+        return this;
     }
 
     public boolean isNoticed() {
