@@ -7,6 +7,7 @@ import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
+import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.model.enums.HistoryType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.*;
@@ -107,6 +108,7 @@ public class FolderServiceImpl implements FolderService {
         Folder subFolder = getSubFolder(folderName, authentication, mainFolder.getPath().getShortPath())
                 .setRootFolder(mainFolder.getLink());
         subFolder = folderRepository.save(subFolder);
+        historyService.createUploadHistory(mainFolder, subFolder, HistoryType.CREATE, ContextType.FOLDER, authentication);
         if (mainFolder.getAccess() != null) {
             ElementAccess elementAccess = new ElementAccess()
                     .setElement(subFolder)

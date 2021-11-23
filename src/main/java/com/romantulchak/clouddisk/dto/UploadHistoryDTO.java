@@ -27,6 +27,17 @@ public class UploadHistoryDTO extends HistoryDTO {
     @JsonView(View.HistoryView.class)
     private ContextType context;
 
+    public UploadHistoryDTO(){
+
+    }
+
+    public UploadHistoryDTO(String uploadedElementName, UUID uploadedElementLink, String uploadedElementFullPath, ContextType context) {
+        this.uploadedElementName = uploadedElementName;
+        this.uploadedElementLink = uploadedElementLink;
+        this.uploadedElementFullPath = uploadedElementFullPath;
+        this.context = context;
+    }
+
     public String getUploadedElementName() {
         return uploadedElementName;
     }

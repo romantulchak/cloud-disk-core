@@ -7,6 +7,7 @@ import com.romantulchak.clouddisk.exception.FileNotFoundException;
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.ContextType;
+import com.romantulchak.clouddisk.model.enums.HistoryType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.repository.DriveRepository;
 import com.romantulchak.clouddisk.repository.ElementAccessRepository;
@@ -85,8 +86,7 @@ public class FileServiceImpl implements FileService {
     public CompletableFuture<FileDTO> uploadFileIntoFolder(MultipartFile multipartFile, UUID folderLink, Authentication authentication) {
         Folder folder = folderRepository.findFolderByLink(folderLink).orElseThrow((() -> new FolderNotFoundException(folderLink)));
         File file = getFile(multipartFile, multipartFile.getOriginalFilename(), folder.getOwner(), folder);
-        ContextType context = StoreUtils.getContext(file);
-        historyService.createUploadHistory(folder, file.getName(), file.getLink(), file.getPath().getFullPath(), context, authentication);
+        historyService.createUploadHistory(folder, file, HistoryType.UPLOAD_ELEMENT, ContextType.FILE, authentication);
         if (folder.getAccess() != null) {
             ElementAccess elementAccess = new ElementAccess()
                     .setElement(file)

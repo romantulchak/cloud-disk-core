@@ -16,7 +16,7 @@ public interface HistoryService {
 
     History createRenameHistory(StoreAbstract element, String name);
 
-    History createUploadHistory(StoreAbstract element, String name, UUID link, String fullPath, ContextType context, Authentication authentication);
+    History createUploadHistory(StoreAbstract element, StoreAbstract uploadedElement, HistoryType historyType, ContextType context, Authentication authentication);
 
     List<HistoryDTO> findHistoryForElement(long id);
 
