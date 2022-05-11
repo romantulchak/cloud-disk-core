@@ -21,7 +21,7 @@ public class HistoryController {
 
     @GetMapping("/{id}")
     @JsonView(View.HistoryView.class)
-    public List<HistoryDTO> getHistoryForElement(@PathVariable("id") long id){
-        return historyService.findHistoryForElement(id);
+    public List<HistoryDTO> getHistoryForElement(@PathVariable("id") long id, @RequestParam(value = "page") String page){
+        return historyService.findHistoryForElement(id, page);
     }
 }

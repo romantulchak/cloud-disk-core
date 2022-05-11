@@ -15,7 +15,8 @@ import com.romantulchak.clouddisk.model.history.UploadHistory;
 import com.romantulchak.clouddisk.repository.HistoryRepository;
 import com.romantulchak.clouddisk.service.HistoryService;
 import com.romantulchak.clouddisk.utils.StoreUtils;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -63,8 +64,13 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
-    public List<HistoryDTO> findHistoryForElement(long id) {
-        return historyRepository.findAllByElementIdOrderByDateDesc(id)
+    public List<HistoryDTO> findHistoryForElement(long id, String page) {
+        Pageable pageable = PageRequest.of(StoreUtils.parseIf(page), 10);
+//        Slice<History> allByElementIdOrderByDateDesc = historyRepository.findAllByElementIdOrderByDateDesc(id, pageable);
+//        List<HistoryDTO> collect = allByElementIdOrderByDateDesc.getContent().stream().map(history -> convertToDTO(history, View.HistoryView.class)).collect(Collectors.toList());
+
+        return historyRepository.findAllByElementIdOrderByDateDesc(id, pageable)
+                .getContent()
                 .stream()
                 .map(history -> convertToDTO(history, View.HistoryView.class))
                 .collect(Collectors.toList());

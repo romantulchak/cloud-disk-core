@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface FileService {
 
-    List<FileDTO> findFilesInFolder(UUID folderLink);
+    List<FileDTO> findFilesInFolder(UUID folderLink, String page);
 
     List<FileDTO> findFilesInDrive(String driveName);
 

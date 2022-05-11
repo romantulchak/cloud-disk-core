@@ -11,7 +11,6 @@ import com.romantulchak.clouddisk.repository.StarredRepository;
 import com.romantulchak.clouddisk.repository.StoreRepository;
 import com.romantulchak.clouddisk.service.StarredService;
 import com.romantulchak.clouddisk.utils.StoreUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 

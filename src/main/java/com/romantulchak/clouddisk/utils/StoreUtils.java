@@ -8,6 +8,8 @@ import com.romantulchak.clouddisk.model.Trash;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,8 +17,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class StoreUtils {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StoreUtils.class);
+
     private StoreUtils() {
 
+    }
+
+    public static int parseIf(String pageAsString) {
+        if (pageAsString == null || pageAsString.isEmpty()) {
+            return 0;
+        }
+        int page;
+        try {
+            page = Integer.parseInt(pageAsString);
+        } catch (NumberFormatException e) {
+            LOGGER.error("String {} has invalid format", pageAsString);
+            page = 0;
+        }
+        return page;
     }
 
     public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash) {

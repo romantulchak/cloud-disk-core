@@ -10,9 +10,7 @@ import java.util.UUID;
 
 @Entity
 @DiscriminatorValue(value = "Folder")
-public class Folder extends StoreAbstract{
-
-    private UUID rootFolder;
+public class Folder extends StoreAbstract {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "folder", orphanRemoval = true)
     private List<File> files;
@@ -26,12 +24,9 @@ public class Folder extends StoreAbstract{
         this.color = FolderColorType.MOUSE.getColor();
     }
 
-    public UUID getRootFolder() {
-        return rootFolder;
-    }
-
+    @Override
     public Folder setRootFolder(UUID rootFolder) {
-        this.rootFolder = rootFolder;
+        super.setRootFolder(rootFolder);
         return this;
     }
 
@@ -117,7 +112,7 @@ public class Folder extends StoreAbstract{
         return this;
     }
 
-    public String  getColor() {
+    public String getColor() {
         return color;
     }
 

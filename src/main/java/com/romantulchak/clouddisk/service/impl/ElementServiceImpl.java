@@ -96,7 +96,6 @@ public class ElementServiceImpl implements ElementService {
         }
     }
 
-
     @Transactional
     @Override
     public void removeElement(UUID link) {

@@ -2,6 +2,7 @@ package com.romantulchak.clouddisk.access;
 
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
 import com.romantulchak.clouddisk.model.Folder;
+import com.romantulchak.clouddisk.projection.FolderOwnerProjection;
 import com.romantulchak.clouddisk.repository.FolderRepository;
 import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;
 import org.springframework.security.core.Authentication;
@@ -20,9 +21,8 @@ public class UserFolderAccess {
 
     public boolean isAccessToSubFolder(UUID folderLink, Authentication authentication){
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        Folder folder = folderRepository.findFolderByLink(folderLink)
-                .orElseThrow(() -> new FolderNotFoundException(folderLink));
-        return folder.getOwner().getId() == userDetails.getId() || folder.isHasLinkAccess();
+        FolderOwnerProjection folderOwnerProjection = folderRepository.findByLink(folderLink).orElseThrow(() -> new FolderNotFoundException(folderLink));
+        return folderOwnerProjection.getOwner().getId() == userDetails.getId() || folderOwnerProjection.isHasLinkAccess();
     }
 
 }

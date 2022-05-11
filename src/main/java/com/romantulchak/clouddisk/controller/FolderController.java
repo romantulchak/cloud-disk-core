@@ -2,7 +2,6 @@ package com.romantulchak.clouddisk.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.romantulchak.clouddisk.dto.FolderDTO;
-import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
 import com.romantulchak.clouddisk.model.Store;
 import com.romantulchak.clouddisk.model.View;
 import com.romantulchak.clouddisk.service.FolderService;
@@ -48,8 +47,8 @@ public class FolderController {
     @GetMapping("/sub-folders/{folderLink}")
     @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
     @JsonView(View.FolderFileView.class)
-    public List<Store> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink){
-        return folderService.findSubFoldersInFolder(folderLink);
+    public List<Store> findSubFoldersInFolder(@PathVariable("folderLink") UUID folderLink, @RequestParam("page") String page){
+        return folderService.findSubFoldersInFolder(folderLink, page);
     }
 
     @GetMapping("/download-folder/{folderLink}")

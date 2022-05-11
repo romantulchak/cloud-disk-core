@@ -2,6 +2,8 @@ package com.romantulchak.clouddisk.repository;
 
 import com.romantulchak.clouddisk.model.File;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +16,8 @@ import java.util.UUID;
 public interface FileRepository extends JpaRepository<File, Long> {
 
     List<File> findAllByFolderLinkAndRemoveType(UUID link, RemoveType removeType);
+
+    Slice<File> findAllByFolderLinkAndRemoveType(UUID link, RemoveType removeType, Pageable pageable);
 
     List<File> findAllByTrashId(long id);
 

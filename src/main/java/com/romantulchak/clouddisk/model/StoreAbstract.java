@@ -63,6 +63,8 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
     @OneToMany(mappedBy = "element")
     private List<History> histories;
 
+    private UUID rootFolder;
+
     public long getId() {
         return id;
     }
@@ -213,6 +215,15 @@ public abstract class StoreAbstract implements Comparable<StoreAbstract> {
 
     public StoreAbstract setOldName(String oldName) {
         this.oldName = oldName;
+        return this;
+    }
+
+    public UUID getRootFolder() {
+        return rootFolder;
+    }
+
+    public StoreAbstract setRootFolder(UUID rootFolder) {
+        this.rootFolder = rootFolder;
         return this;
     }
 

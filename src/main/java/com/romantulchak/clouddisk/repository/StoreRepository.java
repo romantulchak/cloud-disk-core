@@ -1,7 +1,10 @@
 package com.romantulchak.clouddisk.repository;
 
+import com.romantulchak.clouddisk.model.Folder;
 import com.romantulchak.clouddisk.model.StoreAbstract;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -33,4 +36,6 @@ public interface StoreRepository extends JpaRepository<StoreAbstract, Long> {
     void updateLinkAccess(@Param("hasLinkAccess") boolean hasLinkAccess, @Param("id") long id);
 
     List<StoreAbstract> findAllByDriveNameAndRemoveType(String driveName, RemoveType removeType);
+
+    List<StoreAbstract> findFoldersByRootFolderAndRemoveType(UUID link, RemoveType removeType);
 }

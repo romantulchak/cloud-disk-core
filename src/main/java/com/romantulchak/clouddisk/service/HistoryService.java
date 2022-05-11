@@ -8,7 +8,6 @@ import com.romantulchak.clouddisk.model.enums.HistoryType;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface HistoryService {
 
@@ -18,6 +17,6 @@ public interface HistoryService {
 
     History createUploadHistory(StoreAbstract element, StoreAbstract uploadedElement, HistoryType historyType, ContextType context, Authentication authentication);
 
-    List<HistoryDTO> findHistoryForElement(long id);
+    List<HistoryDTO> findHistoryForElement(long id, String page);
 
 }

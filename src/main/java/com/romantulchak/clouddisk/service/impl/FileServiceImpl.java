@@ -19,6 +19,8 @@ import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
@@ -30,8 +32,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -65,8 +65,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<FileDTO> findFilesInFolder(UUID folderLink) {
-        return fileRepository.findAllByFolderLinkAndRemoveType(folderLink, RemoveType.SAVED)
+    public List<FileDTO> findFilesInFolder(UUID folderLink, String page) {
+        Pageable pageable = PageRequest.of(StoreUtils.parseIf(page), 15);
+        return fileRepository.findAllByFolderLinkAndRemoveType(folderLink, RemoveType.SAVED, pageable)
+                .getContent()
                 .stream()
                 .map(file -> convertToDTO(file, View.FolderFileView.class))
                 .collect(Collectors.toList());
@@ -74,7 +76,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public List<FileDTO> findFilesInDrive(String driveName) {
-        return fileRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED).stream()
+        return fileRepository.findAllByDriveNameAndRemoveType(driveName, RemoveType.SAVED)
+                .stream()
                 .sorted()
                 .map(file -> convertToDTO(file, View.FolderFileView.class))
                 .collect(Collectors.toList());
@@ -108,7 +111,8 @@ public class FileServiceImpl implements FileService {
                 .setOwner(user)
                 .setSize(multipartFile.getSize())
                 .setPath(path)
-                .setFolder(folder);
+                .setFolder(folder)
+                .setRootFolder(folder.getRootFolder());
         return fileRepository.save(file);
 
     }

@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @DiscriminatorValue(value = "File")
-public class File extends StoreAbstract{
+public class File extends StoreAbstract {
 
     private long size;
 
@@ -104,6 +104,12 @@ public class File extends StoreAbstract{
     @Override
     public File setRemove(PreRemove remove) {
         super.setRemove(remove);
+        return this;
+    }
+
+    @Override
+    public File setRootFolder(UUID rootFolder) {
+        super.setRootFolder(rootFolder);
         return this;
     }
 }

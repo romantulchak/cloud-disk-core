@@ -12,13 +12,11 @@ import com.romantulchak.clouddisk.repository.PlanRepository;
 import com.romantulchak.clouddisk.service.DriveService;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service

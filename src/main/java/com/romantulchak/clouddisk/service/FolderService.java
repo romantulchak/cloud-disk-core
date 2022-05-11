@@ -22,7 +22,7 @@ public interface FolderService {
 
     FolderDTO createSubFolder(String folderName, UUID folderLink, Authentication authentication);
 
-    List<Store> findSubFoldersInFolder(UUID folderLink);
+    List<Store> findSubFoldersInFolder(UUID folderLink, String page);
 
     ResponseEntity<Resource> downloadFolder(UUID folderLink) throws IOException;
 

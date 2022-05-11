@@ -10,7 +10,9 @@ import com.romantulchak.clouddisk.model.*;
 import com.romantulchak.clouddisk.model.enums.ContextType;
 import com.romantulchak.clouddisk.model.enums.HistoryType;
 import com.romantulchak.clouddisk.model.enums.RemoveType;
-import com.romantulchak.clouddisk.repository.*;
+import com.romantulchak.clouddisk.repository.DriveRepository;
+import com.romantulchak.clouddisk.repository.ElementAccessRepository;
+import com.romantulchak.clouddisk.repository.FolderRepository;
 import com.romantulchak.clouddisk.service.FileService;
 import com.romantulchak.clouddisk.service.FolderService;
 import com.romantulchak.clouddisk.service.HistoryService;
@@ -29,7 +31,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -120,13 +125,13 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public List<Store> findSubFoldersInFolder(UUID folderLink) {
+    public List<Store> findSubFoldersInFolder(UUID folderLink, String page) {
         List<FolderDTO> subFolders = folderRepository.findFoldersByRootFolderAndRemoveType(folderLink, RemoveType.SAVED)
                 .stream()
                 .sorted()
                 .map(folder -> convertToDTO(folder, View.FolderFileView.class))
                 .collect(Collectors.toList());
-        List<FileDTO> filesInFolder = fileService.findFilesInFolder(folderLink);
+        List<FileDTO> filesInFolder = fileService.findFilesInFolder(folderLink, page);
         List<Store> stores = new ArrayList<>();
         stores.addAll(subFolders);
         stores.addAll(filesInFolder);

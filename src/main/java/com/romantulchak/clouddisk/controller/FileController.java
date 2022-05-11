@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -40,10 +41,17 @@ public class FileController {
         return fileService.uploadFileIntoDrive(file, driveName, authentication).get();
     }
 
-    @GetMapping(value = "/download-file/{fileLink}")
+    @GetMapping("/download-file/{fileLink}")
     @ResponseBody
     public ResponseEntity<Resource> downloadFile(@PathVariable("fileLink") UUID link) throws IOException {
         return fileService.downloadFile(link);
     }
+
+    @GetMapping("/{folderLink}")
+    @PreAuthorize("hasRole('USER') AND @userFolderAccess.isAccessToSubFolder(#folderLink, authentication)")
+    public List<FileDTO> findFiles(@PathVariable("folderLink") UUID folderLink, @RequestParam("page") String page){
+        return fileService.findFilesInFolder(folderLink, page);
+    }
+
 
 }
