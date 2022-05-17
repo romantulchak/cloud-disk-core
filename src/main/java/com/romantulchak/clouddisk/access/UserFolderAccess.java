@@ -1,7 +1,6 @@
 package com.romantulchak.clouddisk.access;
 
 import com.romantulchak.clouddisk.exception.FolderNotFoundException;
-import com.romantulchak.clouddisk.model.Folder;
 import com.romantulchak.clouddisk.projection.FolderOwnerProjection;
 import com.romantulchak.clouddisk.repository.FolderRepository;
 import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;

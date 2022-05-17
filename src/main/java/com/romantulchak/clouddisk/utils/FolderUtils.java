@@ -158,7 +158,7 @@ public class FolderUtils {
         if (osName.contains("Windows")) {
             return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
         }
-        return path.replace("home\\/cloud-disk-files\\/", "");
+        return path.replace("home/cloud-disk-files/", "");
     }
 
     private String getFullPath(String fileRelativePath) {
