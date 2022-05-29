@@ -12,6 +12,8 @@ public class File extends StoreAbstract {
 
     private long size;
 
+    private String previewPath;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Folder folder;
 
@@ -21,6 +23,15 @@ public class File extends StoreAbstract {
 
     public File setSize(long size) {
         this.size = size;
+        return this;
+    }
+
+    public String getPreviewPath() {
+        return previewPath;
+    }
+
+    public File setPreviewPath(String previewPath) {
+        this.previewPath = previewPath;
         return this;
     }
 

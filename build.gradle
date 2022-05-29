@@ -25,6 +25,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.8'
+	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.17'
 	implementation files("libs/dto-mapper.jar")
 }
 

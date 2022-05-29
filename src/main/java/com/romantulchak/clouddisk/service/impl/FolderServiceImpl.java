@@ -1,7 +1,7 @@
 package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
-import com.romantulchak.clouddisk.constant.FilenameConstant;
+import com.romantulchak.clouddisk.constant.ApplicationConstant;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
@@ -184,13 +184,13 @@ public class FolderServiceImpl implements FolderService {
     }
 
     private Folder checkIfMainFolderExists(String folderName, String pathToFile, List<Folder> folders, User user) {
-        String[] folderPathParts = folderName.split(FilenameConstant.SLASH);
+        String[] folderPathParts = folderName.split(ApplicationConstant.SLASH);
         StringBuilder sb = new StringBuilder();
         Folder folder = null;
         for (String value : folderPathParts) {
             sb.append(value)
-                    .append(FilenameConstant.SLASH);
-            String mainFolderIdentifier = sb.toString().replaceAll(FilenameConstant.LAST_SLASH_REGEX, "");
+                    .append(ApplicationConstant.SLASH);
+            String mainFolderIdentifier = sb.toString().replaceAll(ApplicationConstant.LAST_SLASH_REGEX, "");
             String mainFolderName = FileUtils.getMainFolderName(sb.toString());
             if (folders.stream().noneMatch(e -> e.getName().equals(value) && e.getMainFolderIdentifier().equals(mainFolderIdentifier))) {
                 String parentFolderName = FileUtils.getParentFolderPath(sb.toString());

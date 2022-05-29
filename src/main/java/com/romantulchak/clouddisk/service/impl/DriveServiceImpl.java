@@ -1,7 +1,7 @@
 package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
-import com.romantulchak.clouddisk.constant.FilenameConstant;
+import com.romantulchak.clouddisk.constant.ApplicationConstant;
 import com.romantulchak.clouddisk.dto.DriveDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.PlanWithTypeNotFoundException;
@@ -43,8 +43,8 @@ public class DriveServiceImpl implements DriveService {
     @Transactional
     @Override
     public void create(User user) {
-        String driveName = user.getUsername() + FilenameConstant.MINUS_SEPARATOR + UUID.randomUUID()
-                .toString().replace(FilenameConstant.MINUS_SEPARATOR, "");
+        String driveName = user.getUsername() + ApplicationConstant.MINUS_SEPARATOR + UUID.randomUUID()
+                .toString().replace(ApplicationConstant.MINUS_SEPARATOR, "");
         Plan plan = planRepository.findPlanByName(PlanType.STANDARD)
                 .orElseThrow(() -> new PlanWithTypeNotFoundException(PlanType.STANDARD));
         LocalPath localPath = folderUtils.createDrive(driveName);

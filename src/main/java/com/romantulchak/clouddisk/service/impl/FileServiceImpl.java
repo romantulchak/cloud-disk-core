@@ -1,6 +1,7 @@
 package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
+import com.romantulchak.clouddisk.constant.ApplicationConstant;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.exception.DriveNotFoundException;
 import com.romantulchak.clouddisk.exception.FileNotFoundException;
@@ -18,6 +19,11 @@ import com.romantulchak.clouddisk.service.HistoryService;
 import com.romantulchak.clouddisk.utils.FileUtils;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.name.Rename;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,12 +39,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
 public class FileServiceImpl implements FileService {
+
+    private static final Logger LOGGER = LogManager.getLogger(FileServiceImpl.class);
 
     private final FileRepository fileRepository;
     private final FolderRepository folderRepository;
@@ -47,6 +56,10 @@ public class FileServiceImpl implements FileService {
     private final ElementAccessRepository elementAccessRepository;
     private final HistoryService historyService;
     private final EntityMapperInvoker<File, FileDTO> entityMapperInvoker;
+    @Value("${cloud.disk.files.full.path}")
+    private String host;
+    @Value("${cloud.disk.files.folder.path}")
+    private String defaultFolder;
 
     public FileServiceImpl(FileRepository fileRepository,
                            FolderRepository folderRepository,
@@ -103,6 +116,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public File getFile(MultipartFile multipartFile, String fileName, User user, Folder folder) {
         LocalPath path = folderUtils.uploadFile(multipartFile, folder.getPath().getShortPath());
+        String previewForImage = createPreviewForImage(multipartFile, path);
         File file = new File()
                 .setName(fileName)
                 .setCreateAt(LocalDateTime.now())
@@ -112,7 +126,8 @@ public class FileServiceImpl implements FileService {
                 .setSize(multipartFile.getSize())
                 .setPath(path)
                 .setFolder(folder)
-                .setRootFolder(folder.getRootFolder());
+                .setRootFolder(folder.getRootFolder())
+                .setPreviewPath(previewForImage);
         return fileRepository.save(file);
 
     }
@@ -130,6 +145,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File getFile(MultipartFile multipartFile, User user, Drive drive, LocalPath path) {
+        String previewForImage = createPreviewForImage(multipartFile, path);
         return new File()
                 .setDrive(drive)
                 .setName(multipartFile.getOriginalFilename())
@@ -138,7 +154,8 @@ public class FileServiceImpl implements FileService {
                 .setLink(UUID.randomUUID())
                 .setOwner(user)
                 .setSize(multipartFile.getSize())
-                .setPath(path);
+                .setPath(path)
+                .setPreviewPath(previewForImage);
     }
 
     @Override
@@ -152,5 +169,30 @@ public class FileServiceImpl implements FileService {
         return entityMapperInvoker.entityToDTO(file, FileDTO.class, classToCheck)
                 .setNoticed(StoreUtils.isStarred(file))
                 .setOwner(StoreUtils.isOwner(file));
+    }
+
+    /**
+     * Checks if {@link MultipartFile} is image if yes
+     * then creates preview for this image with width and height = 32px
+     * and returns url to this image
+     *
+     * @param multipartFile to check if it's image
+     * @param path to get path to file on server
+     * @return image preview path otherwise null
+     */
+    private String createPreviewForImage(MultipartFile multipartFile, LocalPath path){
+        if (Objects.requireNonNull(multipartFile.getContentType()).startsWith(ApplicationConstant.FILE_TYPE_IMAGE)) {
+            try {
+                List<java.io.File> files = Thumbnails.of(path.getShortPath())
+                        .size(ApplicationConstant.TUMBLER_IMAGE_WIDTH_HEIGHT, ApplicationConstant.TUMBLER_IMAGE_WIDTH_HEIGHT)
+                        .outputQuality(0.80)
+                        .asFiles(Rename.SUFFIX_DOT_THUMBNAIL);
+                String name = files.get(0).getPath().replace(defaultFolder, "");
+                return String.join(ApplicationConstant.SLASH, host, name);
+            } catch (IOException e) {
+                LOGGER.error("Something went wrong during preparing image preview", e);
+            }
+        }
+        return null;
     }
 }

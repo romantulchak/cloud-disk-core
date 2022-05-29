@@ -1,6 +1,6 @@
 package com.romantulchak.clouddisk.utils;
 
-import com.romantulchak.clouddisk.constant.FilenameConstant;
+import com.romantulchak.clouddisk.constant.ApplicationConstant;
 import com.romantulchak.clouddisk.exception.*;
 import com.romantulchak.clouddisk.model.LocalPath;
 import org.apache.commons.lang3.SystemUtils;
@@ -40,7 +40,7 @@ public class FolderUtils {
 
     public LocalPath createDrive(String driveName) {
         try {
-            String shorPath = String.join(FilenameConstant.SLASH, drivePath, driveName);
+            String shorPath = String.join(ApplicationConstant.SLASH, drivePath, driveName);
             Path path = Paths.get(shorPath);
             Files.createDirectory(path);
             String fullPath = getFullPath(driveName);
@@ -58,7 +58,7 @@ public class FolderUtils {
     public LocalPath createFolderWithEncodedName(String shortPath, String realFolderName) {
         String folderName = FileUtils.encodeElementName(realFolderName) + UUID.randomUUID();
         try {
-            String folderPath = String.join(FilenameConstant.SLASH, shortPath, folderName);
+            String folderPath = String.join(ApplicationConstant.SLASH, shortPath, folderName);
             Path path = Paths.get(folderPath);
             boolean exists = Files.exists(path);
             if (!exists) {
@@ -77,7 +77,7 @@ public class FolderUtils {
 
     public String createTrash(String trashName, String shortPath) {
         try {
-            String trashPath = String.join(FilenameConstant.SLASH, shortPath, trashName);
+            String trashPath = String.join(ApplicationConstant.SLASH, shortPath, trashName);
             Path path = Paths.get(trashPath);
             Files.createDirectory(path);
             return trashPath;
@@ -94,7 +94,7 @@ public class FolderUtils {
         try {
             shortPath = shortPath.replaceAll(LAST_SLASH_REGEX, "");
             String fileName = encodeElementName(file.getOriginalFilename()) + UUID.randomUUID() + getFileExtension(file.getOriginalFilename());
-            shortPath = String.join(FilenameConstant.SLASH, shortPath, fileName);
+            shortPath = String.join(ApplicationConstant.SLASH, shortPath, fileName);
             Path path = Paths.get(shortPath);
             String fullPath = getFullPath(getFileRelativePath(shortPath));
             file.transferTo(path);
@@ -125,7 +125,7 @@ public class FolderUtils {
 
     public LocalPath moveFileToTrash(String filePath, String trashPath, String filename) {
         try {
-            String localPath = String.join(FilenameConstant.SLASH, trashPath, filename);
+            String localPath = String.join(ApplicationConstant.SLASH, trashPath, filename);
             Path shortTrashPath = Paths.get(localPath);
             Path shortFilePath = Paths.get(filePath);
             Files.move(shortFilePath, shortTrashPath, StandardCopyOption.REPLACE_EXISTING);
