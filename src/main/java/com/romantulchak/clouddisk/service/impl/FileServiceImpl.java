@@ -116,7 +116,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public File getFile(MultipartFile multipartFile, String fileName, User user, Folder folder) {
         LocalPath path = folderUtils.uploadFile(multipartFile, folder.getPath().getShortPath());
-        String previewForImage = createPreviewForImage(multipartFile, path);
+        LocalPath previewPath = createPreviewForImage(multipartFile, path);
         File file = new File()
                 .setName(fileName)
                 .setCreateAt(LocalDateTime.now())
@@ -127,7 +127,7 @@ public class FileServiceImpl implements FileService {
                 .setPath(path)
                 .setFolder(folder)
                 .setRootFolder(folder.getRootFolder())
-                .setPreviewPath(previewForImage);
+                .setPreviewPath(previewPath);
         return fileRepository.save(file);
 
     }
@@ -145,7 +145,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File getFile(MultipartFile multipartFile, User user, Drive drive, LocalPath path) {
-        String previewForImage = createPreviewForImage(multipartFile, path);
+        LocalPath previewPath = createPreviewForImage(multipartFile, path);
         return new File()
                 .setDrive(drive)
                 .setName(multipartFile.getOriginalFilename())
@@ -155,7 +155,7 @@ public class FileServiceImpl implements FileService {
                 .setOwner(user)
                 .setSize(multipartFile.getSize())
                 .setPath(path)
-                .setPreviewPath(previewForImage);
+                .setPreviewPath(previewPath);
     }
 
     @Override
@@ -180,7 +180,7 @@ public class FileServiceImpl implements FileService {
      * @param path to get path to file on server
      * @return image preview path otherwise null
      */
-    private String createPreviewForImage(MultipartFile multipartFile, LocalPath path){
+    private LocalPath createPreviewForImage(MultipartFile multipartFile, LocalPath path){
         if (Objects.requireNonNull(multipartFile.getContentType()).startsWith(ApplicationConstant.FILE_TYPE_IMAGE)) {
             try {
                 List<java.io.File> files = Thumbnails.of(path.getShortPath())
@@ -188,7 +188,8 @@ public class FileServiceImpl implements FileService {
                         .outputQuality(0.80)
                         .asFiles(Rename.SUFFIX_DOT_THUMBNAIL);
                 String name = files.get(0).getPath().replace(defaultFolder, "");
-                return String.join(ApplicationConstant.SLASH, host, name);
+                String fullPath = String.join(ApplicationConstant.SLASH, host, name);
+                return new LocalPath(fullPath, files.get(0).getPath());
             } catch (IOException e) {
                 LOGGER.error("Something went wrong during preparing image preview", e);
             }

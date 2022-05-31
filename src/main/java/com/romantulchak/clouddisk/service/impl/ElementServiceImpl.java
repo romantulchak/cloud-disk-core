@@ -1,6 +1,7 @@
 package com.romantulchak.clouddisk.service.impl;
 
 import com.mapperDTO.mapper.EntityMapperInvoker;
+import com.romantulchak.clouddisk.constant.ApplicationConstant;
 import com.romantulchak.clouddisk.dto.FileDTO;
 import com.romantulchak.clouddisk.dto.FolderDTO;
 import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
@@ -18,17 +19,21 @@ import com.romantulchak.clouddisk.service.HistoryService;
 import com.romantulchak.clouddisk.service.TrashService;
 import com.romantulchak.clouddisk.utils.FolderUtils;
 import com.romantulchak.clouddisk.utils.StoreUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class ElementServiceImpl implements ElementService {
 
+    private static final Logger LOGGER = LogManager.getLogger(ElementServiceImpl.class);
     private final StoreRepository storeRepository;
     private final FolderUtils folderUtils;
     private final PreRemoveRepository removeRepository;
@@ -59,11 +64,8 @@ public class ElementServiceImpl implements ElementService {
         StoreAbstract element = storeRepository.findByLink(elementLink)
                 .orElseThrow(() -> new FileNotFoundException(elementLink));
         if (element.getRemoveType() == RemoveType.PRE_REMOVED) {
-            LocalPath path = new LocalPath()
-                    .setFullPath(element.getPath().getOldFullPath())
-                    .setShortPath(element.getPath().getOldShortPath())
-                    .setOldFullPath(element.getPath().getFullPath())
-                    .setOldShortPath(element.getPath().getShortPath());
+            LocalPath path = getRestoredPath(element.getPath());
+            restorePreviewImage(element);
             element.setRemoveType(RemoveType.SAVED)
                     .setTrash(null)
                     .setPath(path);
@@ -76,6 +78,18 @@ public class ElementServiceImpl implements ElementService {
         }
     }
 
+    private void restorePreviewImage(StoreAbstract element) {
+        if (element instanceof File){
+            File file = (File) element;
+            LocalPath restoredPreviewPath = getRestoredPath(file.getPreviewPath());
+            file.setPreviewPath(restoredPreviewPath);
+            boolean isMoved = folderUtils.restoreElement(restoredPreviewPath.getOldShortPath(), restoredPreviewPath.getShortPath());
+            if (!isMoved){
+                LOGGER.error("Image preview for file {} could not moved", element.getName());
+            }
+        }
+    }
+
     @Transactional
     @Override
     public void preRemoveElement(UUID elementLink, String driveName) {
@@ -83,13 +97,19 @@ public class ElementServiceImpl implements ElementService {
                 .orElseThrow(() -> new FileNotFoundException(elementLink));
         if (element.getRemoveType() != RemoveType.PRE_REMOVED) {
             Trash trash = trashService.getTrashByDriveName(driveName);
-            LocalPath path = StoreUtils.preRemoveElement(element, folderUtils, trash);
-            if (path == null){
+            Map<String, LocalPath> elementOldNewPathMap = StoreUtils.preRemoveElement(element.getPath(), folderUtils, trash);
+            if (elementOldNewPathMap.isEmpty()){
                 removeElement(elementLink);
             }else{
+                preRemovePreviewImage(element, trash);
+                LocalPath newPath = elementOldNewPathMap.get(ApplicationConstant.NEW_PATH);
+                LocalPath oldPath = elementOldNewPathMap.get(ApplicationConstant.OLD_PATH);
+                element.setRemoveType(RemoveType.PRE_REMOVED)
+                        .setTrash(trash)
+                        .setPath(newPath);
                 storeRepository.save(element);
                 historyService.create(element, HistoryType.PRE_REMOVE);
-                createPreRemove(element, path.getShortPath());
+                createPreRemove(element, oldPath.getShortPath());
             }
         } else {
             throw new ObjectAlreadyPreRemovedException(element.getName());
@@ -144,6 +164,24 @@ public class ElementServiceImpl implements ElementService {
     private void createPreRemove(StoreAbstract element, String pathInTrash) {
         PreRemove remove = new PreRemove(element, pathInTrash);
         removeRepository.save(remove);
+    }
+
+    private void preRemovePreviewImage(StoreAbstract element, Trash trash) {
+        if (element instanceof File) {
+            File file = (File) element;
+            Map<String, LocalPath> previewOldNewPathMap = StoreUtils.preRemoveElement(file.getPreviewPath(), folderUtils, trash);
+            if (!previewOldNewPathMap.isEmpty()){
+                file.setPreviewPath(previewOldNewPathMap.get(ApplicationConstant.NEW_PATH));
+            }
+        }
+    }
+
+    private LocalPath getRestoredPath(LocalPath path) {
+        return new LocalPath()
+                .setFullPath(path.getOldFullPath())
+                .setShortPath(path.getOldShortPath())
+                .setOldFullPath(path.getFullPath())
+                .setOldShortPath(path.getShortPath());
     }
 
     private Store convertToDTO(StoreAbstract element, Class<?> classToCheck) {

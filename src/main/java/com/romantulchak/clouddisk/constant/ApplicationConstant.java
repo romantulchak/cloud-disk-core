@@ -8,4 +8,6 @@ public interface ApplicationConstant {
     String MINUS_SEPARATOR = "-";
     String FILE_TYPE_IMAGE = "image";
     int TUMBLER_IMAGE_WIDTH_HEIGHT = 32;
+    String OLD_PATH = "OLD_PATH";
+    String NEW_PATH = "NEW_PATH";
 }

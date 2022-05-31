@@ -12,7 +12,12 @@ public class File extends StoreAbstract {
 
     private long size;
 
-    private String previewPath;
+    @AttributeOverride(name = "fullPath", column = @Column(name = "preview_full_path"))
+    @AttributeOverride(name = "shortPath", column = @Column(name = "preview_short_path"))
+    @AttributeOverride(name = "oldFullPath", column = @Column(name = "preview_old_full_path"))
+    @AttributeOverride(name = "oldShortPath", column = @Column(name = "preview_old_short_path"))
+    @Embedded
+    private LocalPath previewPath;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Folder folder;
@@ -26,11 +31,11 @@ public class File extends StoreAbstract {
         return this;
     }
 
-    public String getPreviewPath() {
+    public LocalPath getPreviewPath() {
         return previewPath;
     }
 
-    public File setPreviewPath(String previewPath) {
+    public File setPreviewPath(LocalPath previewPath) {
         this.previewPath = previewPath;
         return this;
     }

@@ -158,11 +158,14 @@ public class FolderUtils {
         if (osName.contains("Windows")) {
             return path.replaceAll("[A-z]:\\\\[A-z@*+-\\/*#$%^&()=\\[\\\\\\]{}\\\"\\'?]*\\/", "");
         }
-        return path.replace("home/cloud-disk-files/", "");
+        return path.replace(drivePath, "");
     }
 
     private String getFullPath(String fileRelativePath) {
-        return String.join("/", host, FOLDER_KEY, fileRelativePath);
+        if (fileRelativePath.startsWith(ApplicationConstant.SLASH)){
+            return String.join(ApplicationConstant.SLASH, host, FOLDER_KEY) + fileRelativePath;
+        }
+        return String.join(ApplicationConstant.SLASH, host, FOLDER_KEY, fileRelativePath);
     }
 
 }

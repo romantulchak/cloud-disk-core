@@ -1,18 +1,20 @@
 package com.romantulchak.clouddisk.utils;
 
+import com.romantulchak.clouddisk.constant.ApplicationConstant;
 import com.romantulchak.clouddisk.dto.StoreAbstractDTO;
 import com.romantulchak.clouddisk.model.File;
 import com.romantulchak.clouddisk.model.LocalPath;
 import com.romantulchak.clouddisk.model.StoreAbstract;
 import com.romantulchak.clouddisk.model.Trash;
 import com.romantulchak.clouddisk.model.enums.ContextType;
-import com.romantulchak.clouddisk.model.enums.RemoveType;
 import com.romantulchak.clouddisk.service.impl.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class StoreUtils {
@@ -37,20 +39,17 @@ public class StoreUtils {
         return page;
     }
 
-    public static LocalPath preRemoveElement(StoreAbstract element, FolderUtils folderUtils, Trash trash) {
-        LocalPath path = folderUtils.moveFileToTrash(element.getPath().getShortPath(), trash.getPath(), FileUtils.getName(element.getPath().getShortPath()));
+    public static Map<String, LocalPath> preRemoveElement(LocalPath localPath, FolderUtils folderUtils, Trash trash) {
+        LocalPath path = folderUtils.moveFileToTrash(localPath.getShortPath(), trash.getPath(), FileUtils.getName(localPath.getShortPath()));
         if (path != null) {
             LocalPath newPath = new LocalPath()
-                    .setOldFullPath(element.getPath().getFullPath())
-                    .setOldShortPath(element.getPath().getShortPath())
+                    .setOldFullPath(localPath.getFullPath())
+                    .setOldShortPath(localPath.getShortPath())
                     .setShortPath(path.getShortPath())
                     .setFullPath(path.getFullPath());
-            element.setRemoveType(RemoveType.PRE_REMOVED)
-                    .setTrash(trash)
-                    .setPath(newPath);
-            return path;
+            return Map.of(ApplicationConstant.OLD_PATH, path, ApplicationConstant.NEW_PATH, newPath);
         }
-        return null;
+        return Map.of();
     }
 
     public static void setContext(StoreAbstract store, StoreAbstractDTO storeDTO) {

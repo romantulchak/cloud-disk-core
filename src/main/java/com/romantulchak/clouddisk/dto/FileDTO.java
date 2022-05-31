@@ -12,6 +12,10 @@ public class FileDTO extends StoreAbstractDTO implements Store {
 
     @MapToDTO(mapClass = {View.FolderFileView.class})
     @JsonView(View.FolderFileView.class)
+    private LocalPathDTO previewPath;
+
+    @MapToDTO(mapClass = {View.FolderFileView.class})
+    @JsonView(View.FolderFileView.class)
     private long size;
 
     @Override
@@ -25,6 +29,14 @@ public class FileDTO extends StoreAbstractDTO implements Store {
 
     public void setSize(long size) {
         this.size = size;
+    }
+
+    public LocalPathDTO getPreviewPath() {
+        return previewPath;
+    }
+
+    public void setPreviewPath(LocalPathDTO previewPath) {
+        this.previewPath = previewPath;
     }
 
     @Override
